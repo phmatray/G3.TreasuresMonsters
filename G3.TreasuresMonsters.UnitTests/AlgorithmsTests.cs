@@ -1,4 +1,5 @@
 using G3.TreasuresMonsters.Models;
+using static G3.TreasuresMonsters.Logic.Algorithms;
 
 namespace G3.TreasuresMonsters.UnitTests;
 
@@ -16,7 +17,7 @@ public class AlgorithmsTests
         int[][] treasures = CreateEmptyGrid();
 
         // Act
-        Algorithms.GT.GenerateMonstersAndTreasures(monsters, treasures);
+        GT.GenerateMonstersAndTreasures(monsters, treasures);
 
         // Assert
         for (int y = 0; y < Height; y++)
@@ -86,7 +87,7 @@ public class AlgorithmsTests
         treasures[4][1] = 30;
 
         // Act
-        Algorithms.DC.SortLevel(monsters, treasures);
+        DC.SortLevel(monsters, treasures);
 
         // Assert
         // Compute the row values after sorting
@@ -136,7 +137,7 @@ public class AlgorithmsTests
         };
 
         // Act
-        int greedyScore = Algorithms.GS.GreedySolution(state);
+        int greedyScore = GS.GreedySolution(state);
 
         // Assert
         // The greedy algorithm should avoid the high-strength monster
@@ -168,7 +169,7 @@ public class AlgorithmsTests
         };
 
         // Act
-        string perfectPath = Algorithms.DP.PerfectSolution(state);
+        string perfectPath = DP.PerfectSolution(state);
 
         // Assert
         // Expected path is "DRD" to collect both treasures
@@ -207,7 +208,7 @@ public class AlgorithmsTests
 
         int expectedScore = health + treasuresCollected;
         var memo = new Dictionary<(int x, int y, int health), (int score, string path)>();
-        var result = Algorithms.DP.DP_Search(state.HeroX, state.HeroY, state.HeroHealth, state, memo);
+        var result = DP.DP_Search(state.HeroX, state.HeroY, state.HeroHealth, state, memo);
 
         Assert.That(result.score, Is.EqualTo(expectedScore), "Perfect solution did not find the optimal score");
     }
