@@ -1,0 +1,4 @@
+﻿<Solution>
+  <Project Path="G3.TreasuresMonsters.UnitTests\G3.TreasuresMonsters.UnitTests.csproj" Type="Classic C#" />
+  <Project Path="G3.TreasuresMonsters\G3.TreasuresMonsters.csproj" Type="Classic C#" />
+</Solution>
