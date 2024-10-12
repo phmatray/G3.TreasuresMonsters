@@ -116,6 +116,7 @@ public class AlgorithmsTests
     public void GreedySolution_ShouldReturnNonOptimalScore()
     {
         // Arrange
+        int[] heroPos = [0, 0];
         int[][] monsters = CreateEmptyGrid();
         int[][] treasures = CreateEmptyGrid();
 
@@ -127,14 +128,7 @@ public class AlgorithmsTests
         // High-value treasure
         treasures[1][1] = 80;
 
-        State state = new State
-        {
-            Monsters = monsters,
-            Treasures = treasures,
-            HeroX = 0,
-            HeroY = 0,
-            HeroHealth = 100
-        };
+        State state = new State(heroPos, 100, 0, monsters, treasures, 0, 1);
 
         // Act
         int greedyScore = GS.GreedySolution(state);
@@ -150,6 +144,7 @@ public class AlgorithmsTests
     public void PerfectSolution_ShouldReturnOptimalPath()
     {
         // Arrange
+        int[] heroPos = [0, 0];
         int[][] monsters = CreateEmptyGrid();
         int[][] treasures = CreateEmptyGrid();
 
@@ -159,14 +154,7 @@ public class AlgorithmsTests
         monsters[1][2] = 10;
         treasures[2][2] = 30;
 
-        State state = new State
-        {
-            Monsters = monsters,
-            Treasures = treasures,
-            HeroX = 0,
-            HeroY = 0,
-            HeroHealth = 100
-        };
+        State state = new State(heroPos, 100, 0, monsters, treasures, 0, 1);
 
         // Act
         string perfectPath = DP.PerfectSolution(state);

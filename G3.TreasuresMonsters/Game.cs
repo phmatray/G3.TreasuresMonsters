@@ -5,14 +5,14 @@ namespace G3.TreasuresMonsters;
 
 public class Game
 {
-    private Hero hero;
-    private Dungeon dungeon;
-    private int level = 1;
-    private int scoreToBeat;
+    private readonly Hero _hero;
+    private Dungeon _dungeon;
+    private int _level = 1;
+    private int _scoreToBeat;
 
     public Game()
     {
-        hero = new Hero();
+        _hero = new Hero();
         StartNewLevel();
     }
 
@@ -20,24 +20,16 @@ public class Game
     {
         int width = 7;
         int height = 5;
-        dungeon = new Dungeon(width, height);
-        hero.X = width / 2;
-        hero.Y = 0;
-        hero.Health = Math.Min(100, hero.Health + 50);
+        _dungeon = new Dungeon(width, height);
+        _hero.X = width / 2;
+        _hero.Y = 0;
+        _hero.Health = Math.Min(100, _hero.Health + 50);
 
         // Créer l'état du jeu pour les algorithmes
-        State state = new State
-        {
-            Monsters = dungeon.Monsters,
-            Treasures = dungeon.Treasures,
-            HeroX = hero.X,
-            HeroY = hero.Y,
-            HeroHealth = hero.Health
-        };
-
-        scoreToBeat = Algorithms.GS.GreedySolution(state);
-        Console.WriteLine($"\n--- Niveau {level} ---");
-        Console.WriteLine($"Score à battre : {scoreToBeat}");
+        State state = new State(_hero.HeroPos, _hero.Health, _hero.Score, _dungeon.Monsters, _dungeon.Treasures, _hero.NbHint, _level);
+        _scoreToBeat = Algorithms.GS.GreedySolution(state);
+        Console.WriteLine($"\n--- Niveau {_level} ---");
+        Console.WriteLine($"Score à battre : {_scoreToBeat}");
         PlayLevel();
     }
 
@@ -46,7 +38,7 @@ public class Game
         while (true)
         {
             DisplayDungeon();
-            if (hero.Health <= 0)
+            if (_hero.Health <= 0)
             {
                 Console.WriteLine("Vous êtes mort. Fin du jeu !");
                 Environment.Exit(0);
@@ -63,9 +55,9 @@ public class Game
             }
             else if (input == ConsoleKey.H)
             {
-                if (hero.Hints > 0)
+                if (_hero.NbHint > 0)
                 {
-                    hero.Hints--;
+                    _hero.NbHint--;
                     ShowPerfectPath();
                 }
                 else
@@ -76,10 +68,10 @@ public class Game
             else
             {
                 HandleMovement(input);
-                if (hero.Y == dungeon.Height)
+                if (_hero.Y == _dungeon.Height)
                 {
                     EndLevel();
-                    level++;
+                    _level++;
                     StartNewLevel();
                     break;
                 }
@@ -90,22 +82,15 @@ public class Game
     private void ShowPerfectPath()
     {
         Console.WriteLine("Calcul de la solution parfaite...");
-        State state = new State
-        {
-            Monsters = dungeon.Monsters,
-            Treasures = dungeon.Treasures,
-            HeroX = hero.X,
-            HeroY = hero.Y,
-            HeroHealth = hero.Health
-        };
+        State state = new State(_hero.HeroPos, _hero.Health, _hero.Score, _dungeon.Monsters, _dungeon.Treasures, _hero.NbHint, _level);
         var path = Algorithms.DP.PerfectSolution(state);
         Console.WriteLine($"Chemin parfait : {path}");
     }
 
     private void HandleMovement(ConsoleKey key)
     {
-        int newX = hero.X;
-        int newY = hero.Y;
+        int newX = _hero.X;
+        int newY = _hero.Y;
 
         switch (key)
         {
@@ -126,51 +111,51 @@ public class Game
                 return;
         }
 
-        if (newX < 0 || newX >= dungeon.Width || newY < 0 || newY > dungeon.Height)
+        if (newX < 0 || newX >= _dungeon.Width || newY < 0 || newY > _dungeon.Height)
         {
             Console.WriteLine("Vous ne pouvez pas vous déplacer là.");
             return;
         }
 
-        if (newY < dungeon.Height)
+        if (newY < _dungeon.Height)
         {
-            Cell cell = dungeon.Grid[newY, newX];
+            Cell cell = _dungeon.Grid[newY, newX];
 
             switch (cell.Type)
             {
                 case CellType.Empty:
                     break;
                 case CellType.Monster:
-                    hero.Health -= cell.Value;
+                    _hero.Health -= cell.Value;
                     Console.WriteLine($"Vous avez rencontré un monstre ! Vous perdez {cell.Value} points de vie.");
                     // Retirer le monstre de la grille et du tableau des monstres
                     cell.Type = CellType.Empty;
                     cell.Value = 0;
-                    dungeon.Monsters[newY][newX] = 0;
+                    _dungeon.Monsters[newY][newX] = 0;
                     break;
                 case CellType.Treasure:
-                    hero.Score += cell.Value;
+                    _hero.Score += cell.Value;
                     Console.WriteLine($"Vous avez trouvé un trésor ! Vous gagnez {cell.Value} points.");
                     // Retirer le trésor de la grille et du tableau des trésors
                     cell.Type = CellType.Empty;
                     cell.Value = 0;
-                    dungeon.Treasures[newY][newX] = 0;
+                    _dungeon.Treasures[newY][newX] = 0;
                     break;
             }
         }
 
-        hero.X = newX;
-        hero.Y = newY;
+        _hero.X = newX;
+        _hero.Y = newY;
     }
 
     private void EndLevel()
     {
         Console.WriteLine("\nNiveau terminé !");
-        Console.WriteLine($"Votre score : {hero.Score}");
+        Console.WriteLine($"Votre score : {_hero.Score}");
 
-        if (hero.Score > scoreToBeat)
+        if (_hero.Score > _scoreToBeat)
         {
-            hero.Hints++;
+            _hero.NbHint++;
             Console.WriteLine("Vous avez battu le score ! Vous gagnez un indice pour les niveaux suivants.");
         }
         else
@@ -181,19 +166,19 @@ public class Game
 
     private void DisplayDungeon()
     {
-        Console.WriteLine($"\nVie : {hero.Health} / 100 | Score : {hero.Score} | Indices : {hero.Hints}\n");
+        Console.WriteLine($"\nVie : {_hero.Health} / 100 | Score : {_hero.Score} | Indices : {_hero.NbHint}\n");
 
-        for (int y = 0; y < dungeon.Height; y++)
+        for (int y = 0; y < _dungeon.Height; y++)
         {
-            for (int x = 0; x < dungeon.Width; x++)
+            for (int x = 0; x < _dungeon.Width; x++)
             {
-                if (hero.X == x && hero.Y == y)
+                if (_hero.X == x && _hero.Y == y)
                 {
                     Console.Write("H ");
                 }
                 else
                 {
-                    switch (dungeon.Grid[y, x].Type)
+                    switch (_dungeon.Grid[y, x].Type)
                     {
                         case CellType.Empty:
                             Console.Write(". ");
@@ -211,7 +196,7 @@ public class Game
             Console.WriteLine();
         }
 
-        if (hero.Y == dungeon.Height)
+        if (_hero.Y == _dungeon.Height)
         {
             Console.WriteLine("Vous êtes en bas du donjon. Appuyez sur 'S' pour passer au niveau suivant.");
         }
