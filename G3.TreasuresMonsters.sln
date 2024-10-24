@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "G3.TreasuresMonsters", "G3.TreasuresMonsters\G3.TreasuresMonsters.csproj", "{F6339091-4364-4D88-8D7C-A6733ADC40A4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "G3.TreasuresMonsters.Tests", "G3.TreasuresMonsters.Tests\G3.TreasuresMonsters.Tests.csproj", "{A6B2FDC2-2B59-4D9F-981C-284B19EA1F19}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{F6339091-4364-4D88-8D7C-A6733ADC40A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6339091-4364-4D88-8D7C-A6733ADC40A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F6339091-4364-4D88-8D7C-A6733ADC40A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6B2FDC2-2B59-4D9F-981C-284B19EA1F19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6B2FDC2-2B59-4D9F-981C-284B19EA1F19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6B2FDC2-2B59-4D9F-981C-284B19EA1F19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6B2FDC2-2B59-4D9F-981C-284B19EA1F19}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

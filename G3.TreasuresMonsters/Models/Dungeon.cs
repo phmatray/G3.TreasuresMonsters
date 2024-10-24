@@ -21,7 +21,7 @@ public class Dungeon
         Grid = new Cell[Height, Width];
         
         GenerateLevel();
-        Algorithms.DC.SortLevel(Monsters, Treasures); // Trier le niveau après la génération
+        // Algorithms.DC.SortLevel(Monsters, Treasures); // Trier le niveau après la génération
         BuildGridFromArrays(); // Reconstruire la grille à partir des tableaux triés
     }
 
