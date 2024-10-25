@@ -1,6 +1,12 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using G3.TreasuresMonsters;
+using G3.TreasuresMonsters.Services;
+using Microsoft.Extensions.DependencyInjection;
 
-using G3.TreasuresMonsters;
-
-Console.WriteLine("Bienvenue dans Trésors & Monstres !");
-Game game = new Game();
+// Console.WriteLine("Bienvenue dans Trésors & Monstres !");
+ServiceCollection services = new ServiceCollection();
+services.AddSingleton<IGameInput, ConsoleGameInput>();
+services.AddSingleton<IGameOutput, ConsoleGameOutput>();
+services.AddSingleton<GameEngine>();
+var serviceProvider = services.BuildServiceProvider();
+var game = serviceProvider.GetRequiredService<GameEngine>();
+await game.StartNewGame();
