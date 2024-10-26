@@ -1,9 +1,9 @@
 using G3.TreasuresMonsters.Features.I18n;
-using G3.TreasuresMonsters.Logic;
+using G3.TreasuresMonsters.Features.InputOutput;
+using G3.TreasuresMonsters.Features.Logic;
 using G3.TreasuresMonsters.Models;
-using G3.TreasuresMonsters.Services;
 
-namespace G3.TreasuresMonsters;
+namespace G3.TreasuresMonsters.Features.Engine;
 
 public class GameEngine(
     IGameInput input,

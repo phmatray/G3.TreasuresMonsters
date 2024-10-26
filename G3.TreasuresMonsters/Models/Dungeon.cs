@@ -1,4 +1,4 @@
-using G3.TreasuresMonsters.Logic;
+using G3.TreasuresMonsters.Features.Logic;
 
 namespace G3.TreasuresMonsters.Models;
 
@@ -7,8 +7,6 @@ public class Dungeon
     public int Width { get; }
     public int Height { get; }
     public Cell[,] Grid { get; }
-
-    // Ajout des tableaux pour les monstres et les trésors
     public int[][] Monsters { get; }
     public int[][] Treasures { get; }
 

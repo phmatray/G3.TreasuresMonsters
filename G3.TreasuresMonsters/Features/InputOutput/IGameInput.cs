@@ -1,4 +1,4 @@
-namespace G3.TreasuresMonsters.Services;
+namespace G3.TreasuresMonsters.Features.InputOutput;
 
 public interface IGameInput
 {

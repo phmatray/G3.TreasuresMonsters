@@ -1,5 +1,5 @@
 using System.Reflection;
-using G3.TreasuresMonsters.Logic;
+using G3.TreasuresMonsters.Features.Logic;
 
 namespace G3.TreasuresMonsters.Tests;
 

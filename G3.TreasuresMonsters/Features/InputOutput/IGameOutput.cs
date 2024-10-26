@@ -1,7 +1,7 @@
 using G3.TreasuresMonsters.Features.I18n;
 using G3.TreasuresMonsters.Models;
 
-namespace G3.TreasuresMonsters.Services;
+namespace G3.TreasuresMonsters.Features.InputOutput;
 
 public interface IGameOutput
 {

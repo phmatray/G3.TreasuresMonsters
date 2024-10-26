@@ -1,4 +1,4 @@
-namespace G3.TreasuresMonsters.Logic;
+namespace G3.TreasuresMonsters.Features.Logic;
 
 public static partial class Algorithms
 {

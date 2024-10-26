@@ -2,7 +2,7 @@ using System.Text;
 using G3.TreasuresMonsters.Features.I18n;
 using G3.TreasuresMonsters.Models;
 
-namespace G3.TreasuresMonsters.Services;
+namespace G3.TreasuresMonsters.Features.InputOutput;
 
 public class ConsoleGameOutput(ILanguageService language)
     : IGameOutput
@@ -32,11 +32,8 @@ public class ConsoleGameOutput(ILanguageService language)
     public void DisplayDungeon(Dungeon dungeon, Hero hero, int level, int scoreToBeat)
     {
         ClearScreen();
-        DisplayBlankLine();
-        DisplayMessage(LanguageKey.LevelSummary, level);
-        DisplayMessage(LanguageKey.HeroStatus, hero.Health, hero.Score, hero.NbHint);
-        DisplayBlankLine();
-        
+        DisplaySummary(hero, level);
+
         StringBuilder sb = new();
         string topWall    = "╔" + new string('═', (dungeon.Width * 5) + 1) + "╗";
         string bottomWall = "╚" + new string('═', (dungeon.Width * 5) + 1) + "╝";
@@ -74,8 +71,8 @@ public class ConsoleGameOutput(ILanguageService language)
 
         sb.AppendLine(bottomWall);
         
-        string[] levelLines = sb.ToString().Split('\n');
-        foreach (var line in levelLines)
+        // Display the dungeon
+        foreach (var line in sb.ToString().Split('\n'))
         {
             DisplayMessage(line);
         }
@@ -84,5 +81,13 @@ public class ConsoleGameOutput(ILanguageService language)
         {
             DisplayMessage(LanguageKey.LevelEnd);
         }
+    }
+
+    private void DisplaySummary(Hero hero, int level)
+    {
+        DisplayBlankLine();
+        DisplayMessage(LanguageKey.LevelSummary, level);
+        DisplayMessage(LanguageKey.HeroStatus, hero.Health, hero.Score, hero.NbHint);
+        DisplayBlankLine();
     }
 }
