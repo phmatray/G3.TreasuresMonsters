@@ -4,16 +4,14 @@ namespace G3.TreasuresMonsters.Models;
 
 public class Dungeon
 {
-    public int Width { get; }
-    public int Height { get; }
+    public int Width { get; } = 7;
+    public int Height { get; } = 11;
     public Cell[,] Grid { get; }
     public int[][] Monsters { get; }
     public int[][] Treasures { get; }
 
-    public Dungeon(int width, int height)
+    public Dungeon()
     {
-        Width = width;
-        Height = height;
         Monsters = new int[Height][];
         Treasures = new int[Height][];
         Grid = new Cell[Height, Width];
@@ -21,6 +19,9 @@ public class Dungeon
         GenerateLevel();
         // Algorithms.DC.SortLevel(Monsters, Treasures); // Trier le niveau après la génération
         BuildGridFromArrays(); // Reconstruire la grille à partir des tableaux triés
+        
+        Grid[0, Width / 2].Type = CellType.Empty;
+        Grid[0, Width / 2].Value = 0;
     }
 
     private void GenerateLevel()

@@ -1,3 +1,4 @@
+using G3.TreasuresMonsters.Features.Engine;
 using G3.TreasuresMonsters.Models;
 
 namespace G3.TreasuresMonsters.Features.Logic;
@@ -11,7 +12,7 @@ public static partial class Algorithms
         // int greedySolution(State state)
         public static int GreedySolution(State state)
         {
-            int maxScore = GreedySearch(state.HeroX, state.HeroY, state.HeroHealth, 0, state, 5);
+            int maxScore = GreedySearch(state.Hero.X, state.Hero.Y, state.Hero.Health, 0, state, 5);
             return maxScore;
         }
 

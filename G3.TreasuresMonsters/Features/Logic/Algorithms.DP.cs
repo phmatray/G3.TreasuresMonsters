@@ -1,3 +1,4 @@
+using G3.TreasuresMonsters.Features.Engine;
 using G3.TreasuresMonsters.Models;
 
 namespace G3.TreasuresMonsters.Features.Logic;
@@ -13,7 +14,7 @@ public static partial class Algorithms
         public static string PerfectSolution(State state)
         {
             var memo = new Dictionary<(int x, int y, int health), (int score, string path)>();
-            var result = DP_Search(state.HeroX, state.HeroY, state.HeroHealth, state, memo);
+            var result = DP_Search(state.Hero.X, state.Hero.Y, state.Hero.Health, state, memo);
             return result.path;
         }
 

@@ -2,23 +2,17 @@ namespace G3.TreasuresMonsters.Features.I18n;
 
 public class LanguageService : ILanguageService
 {
-    private string _languageCode;
-
-    public LanguageService()
-    {
-        // Default to English
-        SetLanguage("en");
-    }
+    public string LanguageCode { get; private set; } = "en";
 
     public void SetLanguage(string languageCode)
     {
         // Supported languages: "en" and "fr"
-        _languageCode = languageCode == "fr" ? "fr" : "en";
+        LanguageCode = languageCode == "fr" ? "fr" : "en";
     }
 
     public string GetString(LanguageKey key)
     {
-        return _languageCode switch
+        return LanguageCode switch
         {
             "en" => GetEnglishString(key),
             "fr" => GetFrenchString(key),
@@ -26,7 +20,7 @@ public class LanguageService : ILanguageService
         };
     }
 
-    private string GetEnglishString(LanguageKey key)
+    private static string GetEnglishString(LanguageKey key)
     {
         return key switch
         {
@@ -56,7 +50,7 @@ public class LanguageService : ILanguageService
         };
     }
 
-    private string GetFrenchString(LanguageKey key)
+    private static string GetFrenchString(LanguageKey key)
     {
         return key switch
         {
