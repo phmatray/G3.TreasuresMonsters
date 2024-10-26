@@ -1,4 +1,5 @@
 ﻿using G3.TreasuresMonsters;
+using G3.TreasuresMonsters.Features.I18n;
 using G3.TreasuresMonsters.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -6,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 ServiceCollection services = new ServiceCollection();
 services.AddSingleton<IGameInput, ConsoleGameInput>();
 services.AddSingleton<IGameOutput, ConsoleGameOutput>();
+services.AddSingleton<ILanguageService, LanguageService>();
 services.AddSingleton<GameEngine>();
 var serviceProvider = services.BuildServiceProvider();
 var game = serviceProvider.GetRequiredService<GameEngine>();

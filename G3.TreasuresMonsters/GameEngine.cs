@@ -1,3 +1,4 @@
+using G3.TreasuresMonsters.Features.I18n;
 using G3.TreasuresMonsters.Logic;
 using G3.TreasuresMonsters.Models;
 using G3.TreasuresMonsters.Services;
@@ -28,8 +29,9 @@ public class GameEngine(
         InitializeHero();
         _scoreToBeat = CalculateScoreToBeat();
         output.ClearScreen();
-        output.DisplayMessage($"\n--- Niveau {_level} ---");
-        output.DisplayMessage($"Score à battre : {_scoreToBeat}\n");
+        output.DisplayBlankLine();
+        output.DisplayMessage(LanguageKey.Level, _level);
+        output.DisplayMessage(LanguageKey.ScoreToBeat, _scoreToBeat);
         await PlayLevel();
     }
 
@@ -65,11 +67,11 @@ public class GameEngine(
                 return;
             }
 
-            Console.Write("Déplacez-vous (↑/←/↓/→), H pour indice, Q pour quitter : ");
-            var input1 = await input.GetInputAsync();
+            output.DisplayMessage(LanguageKey.MovePrompt);
+            var inputKey = await input.GetInputAsync();
             output.DisplayMessage("");
 
-            if (!await HandleInput(input1))
+            if (!await HandleInput(inputKey))
             {
                 break;
             }
@@ -78,8 +80,11 @@ public class GameEngine(
 
     private bool IsHeroDead()
     {
-        if (_hero.Health > 0) return false;
-        output.DisplayMessage("Vous êtes mort. Fin du jeu !");
+        if (_hero.Health > 0)
+        {
+            return false;
+        }
+        output.DisplayMessage(LanguageKey.GameOver);
         Environment.Exit(0);
         return true;
     }
@@ -89,7 +94,7 @@ public class GameEngine(
         switch (inputKey)
         {
             case ConsoleKey.Q:
-                output.DisplayMessage("Merci d'avoir joué !");
+                output.DisplayMessage(LanguageKey.ThanksForPlaying);
                 Environment.Exit(0);
                 return false;
             case ConsoleKey.H:
@@ -112,15 +117,16 @@ public class GameEngine(
     {
         if (_hero.NbHint <= 0)
         {
-            output.DisplayMessage("Aucun indice disponible.");
+            output.DisplayMessage(LanguageKey.NoHintAvailable);
             return;
         }
 
         _hero.NbHint--;
-        output.DisplayMessage("Calcul de la solution parfaite...");
+        output.DisplayMessage(LanguageKey.CalculatingPerfectSolution);
         State state = new State(_hero.HeroPos, _hero.Health, _hero.Score, _dungeon.Monsters, _dungeon.Treasures, _hero.NbHint, _level);
         var path = Algorithms.DP.PerfectSolution(state);
-        output.DisplayMessage($"Chemin parfait : {path}\n");
+        output.DisplayMessage(LanguageKey.PerfectPath, path);
+        output.DisplayBlankLine();
     }
 
     private void HandleMovement(ConsoleKey key)
@@ -131,7 +137,7 @@ public class GameEngine(
         switch (key)
         {
             case ConsoleKey.UpArrow:
-                output.DisplayMessage("Impossible de remonter.");
+                output.DisplayMessage(LanguageKey.CannotMoveUp);
                 return;
             case ConsoleKey.DownArrow:
                 newY += 1;
@@ -140,7 +146,7 @@ public class GameEngine(
             case ConsoleKey.LeftArrow:
                 if (_movementDirection == MovementDirection.Right)
                 {
-                    output.DisplayMessage("Vous ne pouvez pas changer de direction vers la gauche.");
+                    output.DisplayMessage(LanguageKey.CannotMoveLeft);
                     return;
                 }
                 newX -= 1;
@@ -149,14 +155,14 @@ public class GameEngine(
             case ConsoleKey.RightArrow:
                 if (_movementDirection == MovementDirection.Left)
                 {
-                    output.DisplayMessage("Vous ne pouvez pas changer de direction vers la droite.");
+                    output.DisplayMessage(LanguageKey.CannotMoveRight);
                     return;
                 }
                 newX += 1;
                 _movementDirection = MovementDirection.Right;
                 break;
             default:
-                output.DisplayMessage("Entrée invalide.");
+                output.DisplayMessage(LanguageKey.InvalidInput);
                 return;
         }
 
@@ -178,7 +184,7 @@ public class GameEngine(
     {
         if (newX < 0 || newX >= _dungeon.Width || newY < 0 || newY > _dungeon.Height)
         {
-            output.DisplayMessage("Vous ne pouvez pas vous déplacer là.");
+            output.DisplayMessage(LanguageKey.CannotMoveThere);
             return false;
         }
         return true;
@@ -194,12 +200,12 @@ public class GameEngine(
                 break;
             case CellType.Monster:
                 _hero.Health -= cell.Value;
-                output.DisplayMessage($"Vous avez rencontré un monstre ! Vous perdez {cell.Value} points de vie.");
+                output.DisplayMessage(LanguageKey.MonsterEncounter, cell.Value);
                 ClearCell(cell, newY, newX);
                 break;
             case CellType.Treasure:
                 _hero.Score += cell.Value;
-                output.DisplayMessage($"Vous avez trouvé un trésor ! Vous gagnez {cell.Value} points.");
+                output.DisplayMessage(LanguageKey.TreasureFound, cell.Value);
                 ClearCell(cell, newY, newX);
                 break;
         }
@@ -218,17 +224,21 @@ public class GameEngine(
 
     private void EndLevel()
     {
-        output.DisplayMessage("\nNiveau terminé !");
-        output.DisplayMessage($"Votre score : {_hero.Score}\n");
+        output.DisplayBlankLine();
+        output.DisplayMessage(LanguageKey.LevelCompleted);
+        output.DisplayMessage(LanguageKey.YourScore, _hero.Score);
+        output.DisplayBlankLine();
 
         if (_hero.Score > _scoreToBeat)
         {
             _hero.NbHint++;
-            output.DisplayMessage("Vous avez battu le score ! Vous gagnez un indice pour les niveaux suivants.\n");
+            output.DisplayMessage(LanguageKey.BeatScore);
         }
         else
         {
-            output.DisplayMessage("Vous n'avez pas battu le score.\n");
+            output.DisplayMessage(LanguageKey.DidNotBeatScore);
         }
+
+        output.DisplayBlankLine();
     }
 }

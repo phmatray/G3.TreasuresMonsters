@@ -1,67 +1,88 @@
+using System.Text;
+using G3.TreasuresMonsters.Features.I18n;
 using G3.TreasuresMonsters.Models;
 
 namespace G3.TreasuresMonsters.Services;
 
-public class ConsoleGameOutput : IGameOutput
+public class ConsoleGameOutput(ILanguageService language)
+    : IGameOutput
 {
     public void ClearScreen()
     {
         Console.Clear();
     }
-    
+
+    public void DisplayBlankLine()
+    {
+        Console.WriteLine();
+    }
+
     public void DisplayMessage(string message)
     {
         Console.WriteLine(message);
     }
 
+    public void DisplayMessage(LanguageKey key, params object?[] args)
+    {
+        var format = language.GetString(key);
+        var message = string.Format(format, args);
+        DisplayMessage(message);
+    }
+
     public void DisplayDungeon(Dungeon dungeon, Hero hero, int level, int scoreToBeat)
     {
-        Console.Clear();
-        Console.WriteLine($"\nNiveau : {level}");
-        Console.WriteLine($"Vie : {hero.Health} / 100 | Score : {hero.Score} | Indices : {hero.NbHint}\n");
-
-        string topWall = "╔" + new string('═', (dungeon.Width * 5) + 1) + "╗";
+        ClearScreen();
+        DisplayBlankLine();
+        DisplayMessage(LanguageKey.LevelSummary, level);
+        DisplayMessage(LanguageKey.HeroStatus, hero.Health, hero.Score, hero.NbHint);
+        DisplayBlankLine();
+        
+        StringBuilder sb = new();
+        string topWall    = "╔" + new string('═', (dungeon.Width * 5) + 1) + "╗";
         string bottomWall = "╚" + new string('═', (dungeon.Width * 5) + 1) + "╝";
-        Console.WriteLine(topWall);
+        sb.AppendLine(topWall);
 
         for (int y = 0; y < dungeon.Height; y++)
         {
-            Console.Write("║ "); // Left wall
+            sb.Append("║ "); // Left wall
             for (int x = 0; x < dungeon.Width; x++)
             {
                 if (hero.X == x && hero.Y == y)
                 {
-                    Console.Write("🦄   "); // Hero emoji with consistent spacing
+                    sb.Append("🦄   "); // Hero emoji with consistent spacing
                 }
                 else
                 {
-                    DisplayCell(dungeon.Grid[y, x]);
+                    Cell cell = dungeon.Grid[y, x];
+                    switch (cell.Type)
+                    {
+                        case CellType.Empty:
+                            sb.Append(".    ");
+                            break;
+                        case CellType.Monster:
+                            sb.Append($"👹{cell.Value:D2} "); // Monster emoji with strength
+                            break;
+                        case CellType.Treasure:
+                            sb.Append($"💰{cell.Value:D2} "); // Treasure emoji with value
+                            break;
+                    }
                 }
             }
-            Console.WriteLine("║"); // Right wall
+            sb.Append('║'); // Right wall
+            sb.AppendLine();
         }
 
-        Console.WriteLine(bottomWall);
+        sb.AppendLine(bottomWall);
+        
+        string[] levelLines = sb.ToString().Split('\n');
+        foreach (var line in levelLines)
+        {
+            DisplayMessage(line);
+        }
 
         if (hero.Y == dungeon.Height)
         {
-            Console.WriteLine("Vous êtes en bas du donjon. Appuyez sur '↓' pour passer au niveau suivant.");
-        }
-    }
-    
-    private void DisplayCell(Cell cell)
-    {
-        switch (cell.Type)
-        {
-            case CellType.Empty:
-                Console.Write(".    ");
-                break;
-            case CellType.Monster:
-                Console.Write($"👹{cell.Value:D2} "); // Monster emoji with strength
-                break;
-            case CellType.Treasure:
-                Console.Write($"💰{cell.Value:D2} "); // Treasure emoji with value
-                break;
+            DisplayMessage(LanguageKey.LevelEnd);
         }
     }
 }
