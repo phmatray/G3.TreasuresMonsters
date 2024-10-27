@@ -47,27 +47,15 @@ public class Dungeon
             {
                 if (Monsters[y][x] > 0)
                 {
-                    Grid[y, x] = new Cell
-                    {
-                        Type = CellType.Monster,
-                        Value = Monsters[y][x]
-                    };
+                    Grid[y, x] = Cell.CreateMonsterCell(Monsters[y][x]);
                 }
                 else if (Treasures[y][x] > 0)
                 {
-                    Grid[y, x] = new Cell
-                    {
-                        Type = CellType.Treasure,
-                        Value = Treasures[y][x]
-                    };
+                    Grid[y, x] = Cell.CreateTreasureCell(Treasures[y][x]);
                 }
                 else
                 {
-                    Grid[y, x] = new Cell
-                    {
-                        Type = CellType.Empty,
-                        Value = 0
-                    };
+                    Grid[y, x] = Cell.CreateEmptyCell();
                 }
             }
         }
