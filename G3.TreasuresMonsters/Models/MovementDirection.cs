@@ -1,6 +1,6 @@
 namespace G3.TreasuresMonsters.Models;
 
-public enum MovementDirection
+public enum MovementConstraint
 {
     None,
     Left,

@@ -14,14 +14,11 @@ public class Hero
     /// </summary>
     public int Score { get; private set; }
     
+    public MovementConstraint MoveConstraint { get; private set; } = MovementConstraint.None;
+    
     public int X { get; private set; }
     
     public int Y { get; private set; }
-    
-    /// <summary>
-    /// Current position of the hero in the level
-    /// </summary>
-    public int[] HeroPos => [X, Y];
     
     /// <summary>
     /// Number of hints available to the player
@@ -32,6 +29,24 @@ public class Hero
     {
         X = newX;
         Y = newY;
+    }
+    
+    public void MoveLeft()
+    {
+        X--;
+        MoveConstraint = MovementConstraint.Right;
+    }
+    
+    public void MoveRight()
+    {
+        X++;
+        MoveConstraint = MovementConstraint.Left;
+    }
+    
+    public void MoveDown()
+    {
+        Y++;
+        MoveConstraint = MovementConstraint.None;
     }
 
     public void DecreaseHealth(int value)

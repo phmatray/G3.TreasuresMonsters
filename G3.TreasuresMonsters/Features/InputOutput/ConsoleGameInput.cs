@@ -2,8 +2,8 @@ namespace G3.TreasuresMonsters.Features.InputOutput;
 
 public class ConsoleGameInput : IGameInput
 {
-    public async Task<ConsoleKey> GetInputAsync()
+    public ConsoleKey GetInput()
     {
-        return await Task.Run(() => Console.ReadKey().Key);
+        return Console.ReadKey().Key;
     }
 }
