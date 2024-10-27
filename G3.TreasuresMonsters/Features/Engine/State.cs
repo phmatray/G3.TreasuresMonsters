@@ -9,16 +9,8 @@ public class State
 {
     public Hero Hero { get; } = new();
     
-    /// <summary>
-    /// Monsters in the current level, 0 if no monster
-    /// </summary>
-    public int[][] Monsters { get; } = [];
+    public Dungeon Dungeon { get; set; } = new();
     
-    /// <summary>
-    /// Treasures in the current level, 0 if no treasure
-    /// </summary>
-    public int[][] Treasures { get; } = [];
-
     /// <summary>
     /// Current level number, starting at 1 and going up
     /// </summary>

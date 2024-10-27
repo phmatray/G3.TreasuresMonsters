@@ -7,8 +7,18 @@ public class Dungeon
     public int Width { get; } = 7;
     public int Height { get; } = 11;
     public Cell[,] Grid { get; }
+    
+    /// <summary>
+    /// Monsters in the current level, 0 if no monster
+    /// </summary>
     public int[][] Monsters { get; }
+    
+    /// <summary>
+    /// Treasures in the current level, 0 if no treasure
+    /// </summary>
     public int[][] Treasures { get; }
+    
+    public int ScoreToBeat { get; set; }
 
     public Dungeon()
     {
@@ -17,7 +27,6 @@ public class Dungeon
         Grid = new Cell[Height, Width];
         
         GenerateLevel();
-        // Algorithms.DC.SortLevel(Monsters, Treasures); // Trier le niveau après la génération
         BuildGridFromArrays(); // Reconstruire la grille à partir des tableaux triés
         
         Grid[0, Width / 2].Type = CellType.Empty;
@@ -34,6 +43,7 @@ public class Dungeon
         }
 
         Algorithms.GT.GenerateMonstersAndTreasures(Monsters, Treasures);
+        // Algorithms.DC.SortLevel(Monsters, Treasures); // Trier le niveau après la génération
 
         BuildGridFromArrays();
     }

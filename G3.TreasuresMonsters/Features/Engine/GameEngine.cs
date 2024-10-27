@@ -11,9 +11,6 @@ public class GameEngine(
     IGameOutput _output)
 {
     private readonly State _state = new();
-    private Dungeon _dungeon;
-    private int _level = 1;
-    private int _scoreToBeat;
     private MovementDirection _movementDirection = MovementDirection.None;
     
     public async Task StartNewGame()
@@ -23,16 +20,16 @@ public class GameEngine(
 
     private async Task StartNewLevel()
     {
-        _dungeon = new Dungeon();
-        _state.Hero.SetPosition(_dungeon.Width / 2, 0);
+        _state.Dungeon = new Dungeon();
+        _state.Hero.SetPosition(_state.Dungeon.Width / 2, 0);
         _state.Hero.GainHealth(50);
-        _dungeon.Monsters[_state.Hero.Y][_state.Hero.X] = 0;
-        _dungeon.Treasures[_state.Hero.Y][_state.Hero.X] = 0;
-        _scoreToBeat = CalculateScoreToBeat();
+        _state.Dungeon.Monsters[_state.Hero.Y][_state.Hero.X] = 0;
+        _state.Dungeon.Treasures[_state.Hero.Y][_state.Hero.X] = 0;
+        _state.Dungeon.ScoreToBeat = CalculateScoreToBeat();
         _output.ClearScreen();
         _output.DisplayBlankLine();
-        _output.DisplayMessage(LanguageKey.Level, _level);
-        _output.DisplayMessage(LanguageKey.ScoreToBeat, _scoreToBeat);
+        _output.DisplayMessage(LanguageKey.Level, _state.NbLevel);
+        _output.DisplayMessage(LanguageKey.ScoreToBeat, _state.Dungeon.ScoreToBeat);
         await PlayLevel();
     }
 
@@ -45,7 +42,7 @@ public class GameEngine(
     {
         while (true)
         {
-            _output.DisplayDungeon(_dungeon, _state.Hero, _level, _scoreToBeat);
+            _output.DisplayDungeon(_state.Dungeon, _state.Hero, _state.NbLevel, _state.Dungeon.ScoreToBeat);
             if (_state.Hero.IsDead)
             {
                 _output.DisplayMessage(LanguageKey.GameOver);
@@ -76,10 +73,10 @@ public class GameEngine(
                 return true;
             default:
                 HandleMovement(inputKey);
-                if (_state.Hero.Y >= _dungeon.Height)
+                if (_state.Hero.Y >= _state.Dungeon.Height)
                 {
                     EndLevel();
-                    _level++;
+                    _state.NbLevel++;
                     await StartNewLevel();
                     return false;
                 }
@@ -145,7 +142,7 @@ public class GameEngine(
             return;
         }
 
-        if (newY == _dungeon.Height)
+        if (newY == _state.Dungeon.Height)
         {
             _state.Hero.SetPosition(newX, newY);
             return;
@@ -156,7 +153,7 @@ public class GameEngine(
 
     private bool IsValidMove(int newX, int newY)
     {
-        if (newX < 0 || newX >= _dungeon.Width || newY < 0 || newY > _dungeon.Height)
+        if (newX < 0 || newX >= _state.Dungeon.Width || newY < 0 || newY > _state.Dungeon.Height)
         {
             _output.DisplayMessage(LanguageKey.CannotMoveThere);
             return false;
@@ -166,7 +163,7 @@ public class GameEngine(
 
     private void UpdateHeroPosition(int newX, int newY)
     {
-        Cell cell = _dungeon.Grid[newY, newX];
+        Cell cell = _state.Dungeon.Grid[newY, newX];
 
         switch (cell.Type)
         {
@@ -191,8 +188,8 @@ public class GameEngine(
     {
         cell.Type = CellType.Empty;
         cell.Value = 0;
-        _dungeon.Monsters[y][x] = 0;
-        _dungeon.Treasures[y][x] = 0;
+        _state.Dungeon.Monsters[y][x] = 0;
+        _state.Dungeon.Treasures[y][x] = 0;
     }
 
     private void EndLevel()
@@ -202,7 +199,7 @@ public class GameEngine(
         _output.DisplayMessage(LanguageKey.YourScore, _state.Hero.Score);
         _output.DisplayBlankLine();
 
-        if (_state.Hero.Score > _scoreToBeat)
+        if (_state.Hero.Score > _state.Dungeon.ScoreToBeat)
         {
             _state.Hero.AddHint();
             _output.DisplayMessage(LanguageKey.BeatScore);

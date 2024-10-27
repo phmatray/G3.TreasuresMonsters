@@ -1,5 +1,4 @@
 using G3.TreasuresMonsters.Features.Engine;
-using G3.TreasuresMonsters.Models;
 
 namespace G3.TreasuresMonsters.Features.Logic;
 
@@ -19,7 +18,7 @@ public static partial class Algorithms
         // Méthodes utilitaires récursives pour GS
         private static int GreedySearch(int x, int y, int health, int treasureCollected, State state, int depth)
         {
-            if (depth == 0 || y >= state.Monsters.Length || health <= 0)
+            if (depth == 0 || y >= state.Dungeon.Monsters.Length || health <= 0)
             {
                 return health + treasureCollected;
             }
@@ -43,21 +42,21 @@ public static partial class Algorithms
             int nx = x + dx[i];
             int ny = y + dy[i];
 
-            int width = state.Monsters[0].Length;
-            int height = state.Monsters.Length;
+            int width = state.Dungeon.Monsters[0].Length;
+            int height = state.Dungeon.Monsters.Length;
 
             if (nx >= 0 && nx < width && ny >= 0 && ny < height)
             {
                 int newHealth = health;
                 int newTreasureCollected = treasureCollected;
 
-                if (state.Monsters[ny][nx] > 0)
+                if (state.Dungeon.Monsters[ny][nx] > 0)
                 {
-                    newHealth -= state.Monsters[ny][nx];
+                    newHealth -= state.Dungeon.Monsters[ny][nx];
                 }
-                if (state.Treasures[ny][nx] > 0)
+                if (state.Dungeon.Treasures[ny][nx] > 0)
                 {
-                    newTreasureCollected += state.Treasures[ny][nx];
+                    newTreasureCollected += state.Dungeon.Treasures[ny][nx];
                 }
 
                 if (newHealth > 0)

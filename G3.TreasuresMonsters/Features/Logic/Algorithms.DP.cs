@@ -1,5 +1,4 @@
 using G3.TreasuresMonsters.Features.Engine;
-using G3.TreasuresMonsters.Models;
 
 namespace G3.TreasuresMonsters.Features.Logic;
 
@@ -21,7 +20,7 @@ public static partial class Algorithms
         // Méthodes utilitaires récursives pour DP
         public static (int score, string path) DP_Search(int x, int y, int health, State state, Dictionary<(int x, int y, int health), (int score, string path)> memo)
         {
-            int height = state.Monsters.Length;
+            int height = state.Dungeon.Monsters.Length;
 
             if (y >= height)
             {
@@ -61,20 +60,20 @@ public static partial class Algorithms
             int nx = x + dx[i];
             int ny = y + dy[i];
 
-            int width = state.Monsters[0].Length;
+            int width = state.Dungeon.Monsters[0].Length;
 
             if (nx >= 0 && nx < width && ny >= 0)
             {
                 int newHealth = health;
                 int treasureCollected = 0;
 
-                if (state.Monsters[ny][nx] > 0)
+                if (state.Dungeon.Monsters[ny][nx] > 0)
                 {
-                    newHealth -= state.Monsters[ny][nx];
+                    newHealth -= state.Dungeon.Monsters[ny][nx];
                 }
-                if (state.Treasures[ny][nx] > 0)
+                if (state.Dungeon.Treasures[ny][nx] > 0)
                 {
-                    treasureCollected += state.Treasures[ny][nx];
+                    treasureCollected += state.Dungeon.Treasures[ny][nx];
                 }
 
                 if (newHealth > 0)
