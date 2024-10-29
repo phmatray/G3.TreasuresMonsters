@@ -21,7 +21,6 @@ public enum LanguageKey
     DidNotBeatScore,
     GameOver,
     ThanksForPlaying,
-    LevelSummary,
     HeroStatus,
     LevelEnd
 }

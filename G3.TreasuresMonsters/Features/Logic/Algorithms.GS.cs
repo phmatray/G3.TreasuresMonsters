@@ -23,11 +23,11 @@ public static partial class Algorithms
                 return health + treasureCollected;
             }
 
-            int maxScore = int.MinValue;
+            int maxScore = 0;
 
             // Déplacements possibles : Bas, Gauche, Droite
-            int[] dx = { 0, -1, 1 };
-            int[] dy = { 1, 0, 0 };
+            int[] dx = [0, -1, 1];
+            int[] dy = [1, 0, 0];
 
             maxScore = GreedySearchMoves(x, y, health, treasureCollected, state, depth, dx, dy, 0, maxScore);
 

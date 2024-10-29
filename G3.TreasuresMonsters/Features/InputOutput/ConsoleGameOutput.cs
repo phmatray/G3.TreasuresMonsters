@@ -1,4 +1,5 @@
 using System.Text;
+using G3.TreasuresMonsters.Features.Engine;
 using G3.TreasuresMonsters.Features.I18n;
 using G3.TreasuresMonsters.Models;
 
@@ -7,87 +8,135 @@ namespace G3.TreasuresMonsters.Features.InputOutput;
 public class ConsoleGameOutput(ILanguageService language)
     : IGameOutput
 {
-    public void ClearScreen()
+    private readonly List<string> _statusMessages = [];
+    private readonly List<string> _contextMessages = [];
+    private readonly List<string> _dungeonRows = [];
+    private State? _currentState;
+    
+    public void SetState(State state)
     {
-        Console.Clear();
+        _currentState = state;
+        
+        AddStatusMessage(LanguageKey.Level, state.NbLevel);
+        AddStatusMessage(LanguageKey.ScoreToBeat, state.Dungeon.ScoreToBeat);
+        AddStatusMessage(LanguageKey.HeroStatus, state.Hero.Health, state.Hero.Score, state.Hero.NbHint);
+
+        BuildDungeonRows();
     }
 
-    public void DisplayBlankLine()
+    public void DisplayScreen()
     {
+        Console.Clear(); // Clear the console to update the screen
+
+        // Display status messages
+        foreach (var message in _statusMessages)
+        {
+            Console.WriteLine(message);
+        }
+
+        // Display a blank line to separate sections
         Console.WriteLine();
+
+        // Display the dungeon
+        foreach (var row in _dungeonRows)
+        {
+            Console.WriteLine(row);
+        }
+
+        // Display a blank line to separate sections
+        Console.WriteLine();
+        
+        // Display context messages
+        foreach (var message in _contextMessages)
+        {
+            Console.WriteLine(message);
+        }
+        
+        // if (state.Hero.Y == state.Dungeon.Height)
+        // {
+        //     DisplayMessage(LanguageKey.LevelEnd);
+        // }
+        
+        // Clear messages for the next frame
+        _statusMessages.Clear();
+        // _contextMessages.Clear();
+        _dungeonRows.Clear();
+    }
+    
+    private void BuildDungeonRows()
+    {
+        if (_currentState == null)
+        {
+            return;
+        }
+        
+        // Build the top row of the dungeon
+        string topWall = "╔" + new string('═', (_currentState.Dungeon.Width * 5) + 1) + "╗";
+        _dungeonRows.Add(topWall);
+
+        // Build the center of the dungeon
+        for (int y = 0; y < _currentState.Dungeon.Height; y++)
+        {
+            int rowValue = 0;
+            StringBuilder row = new();
+            row.Append("║ "); // Left wall
+            
+            for (int x = 0; x < _currentState.Dungeon.Width; x++)
+            {
+                if (_currentState.Hero.X == x && _currentState.Hero.Y == y)
+                {
+                    row.Append("🦄   "); // Hero emoji with consistent spacing
+                }
+                else
+                {
+                    Cell cell = _currentState.Dungeon.Grid[y, x];
+                    switch (cell.Type)
+                    {
+                        case CellType.Empty:
+                            row.Append(".    ");
+                            break;
+                        case CellType.Monster:
+                            row.Append($"👹{cell.Value:D2} "); // Monster emoji with strength
+                            rowValue -= cell.Value;
+                            break;
+                        case CellType.Treasure:
+                            row.Append($"💰{cell.Value:D2} "); // Treasure emoji with value
+                            rowValue += cell.Value;
+                            break;
+                    }
+                }
+            }
+            
+            row.Append('║'); // Right wall
+            row.Append($" {rowValue:D3}"); // Row value
+            _dungeonRows.Add(row.ToString());
+        }
+
+        // Build the bottom row of the dungeon
+        string bottomWall = "╚" + new string('═', (_currentState.Dungeon.Width * 5) + 1) + "╝";
+        _dungeonRows.Add(bottomWall);
     }
 
-    public void DisplayMessage(string message)
+    public void AddStatusMessage(LanguageKey key, params object[] args)
     {
-        Console.WriteLine(message);
+        var format = language.GetString(key);
+        var message = string.Format(format, args);
+        _statusMessages.Add(message);
+    }
+    
+    public void AddContextMessage(LanguageKey key, params object[] args)
+    {
+        var format = language.GetString(key);
+        var message = string.Format(format, args);
+        _contextMessages.Add(message);
+        DisplayScreen();
+        _contextMessages.Clear();
     }
 
     public void DisplayMessage(LanguageKey key, params object?[] args)
     {
         var format = language.GetString(key);
         var message = string.Format(format, args);
-        DisplayMessage(message);
-    }
-
-    public void DisplayDungeon(Dungeon dungeon, Hero hero, int level, int scoreToBeat)
-    {
-        ClearScreen();
-        DisplaySummary(hero, level);
-
-        StringBuilder sb = new();
-        string topWall    = "╔" + new string('═', (dungeon.Width * 5) + 1) + "╗";
-        string bottomWall = "╚" + new string('═', (dungeon.Width * 5) + 1) + "╝";
-        sb.AppendLine(topWall);
-
-        for (int y = 0; y < dungeon.Height; y++)
-        {
-            sb.Append("║ "); // Left wall
-            for (int x = 0; x < dungeon.Width; x++)
-            {
-                if (hero.X == x && hero.Y == y)
-                {
-                    sb.Append("🦄   "); // Hero emoji with consistent spacing
-                }
-                else
-                {
-                    Cell cell = dungeon.Grid[y, x];
-                    switch (cell.Type)
-                    {
-                        case CellType.Empty:
-                            sb.Append(".    ");
-                            break;
-                        case CellType.Monster:
-                            sb.Append($"👹{cell.Value:D2} "); // Monster emoji with strength
-                            break;
-                        case CellType.Treasure:
-                            sb.Append($"💰{cell.Value:D2} "); // Treasure emoji with value
-                            break;
-                    }
-                }
-            }
-            sb.Append('║'); // Right wall
-            sb.AppendLine();
-        }
-
-        sb.AppendLine(bottomWall);
-        
-        // Display the dungeon
-        foreach (var line in sb.ToString().Split('\n'))
-        {
-            DisplayMessage(line);
-        }
-
-        if (hero.Y == dungeon.Height)
-        {
-            DisplayMessage(LanguageKey.LevelEnd);
-        }
-    }
-
-    private void DisplaySummary(Hero hero, int level)
-    {
-        DisplayBlankLine();
-        DisplayMessage(LanguageKey.LevelSummary, level);
-        DisplayMessage(LanguageKey.HeroStatus, hero.Health, hero.Score, hero.NbHint);
-        DisplayBlankLine();
+        Console.WriteLine(message);
     }
 }

@@ -24,27 +24,18 @@ public class GameEngine(
         _state.Hero.GainHealth(50);
         _state.Dungeon.Monsters[_state.Hero.Y][_state.Hero.X] = 0;
         _state.Dungeon.Treasures[_state.Hero.Y][_state.Hero.X] = 0;
-        _state.Dungeon.ScoreToBeat = CalculateScoreToBeat();
+        _state.Dungeon.ScoreToBeat = Algorithms.GS.GreedySolution(_state);
         
-        _output.ClearScreen();
-        _output.DisplayBlankLine();
-        _output.DisplayMessage(LanguageKey.Level, _state.NbLevel);
-        _output.DisplayMessage(LanguageKey.ScoreToBeat, _state.Dungeon.ScoreToBeat);
+        _output.SetState(_state);
+        _output.DisplayScreen();
         
         PlayLevel();
-    }
-
-    private int CalculateScoreToBeat()
-    {
-        return Algorithms.GS.GreedySolution(_state);
     }
 
     private void PlayLevel()
     {
         while (true)
         {
-            _output.DisplayDungeon(_state.Dungeon, _state.Hero, _state.NbLevel, _state.Dungeon.ScoreToBeat);
-            
             if (_state.Hero.IsDead)
             {
                 GameOver();
@@ -52,8 +43,6 @@ public class GameEngine(
 
             _output.DisplayMessage(LanguageKey.MovePrompt);
             var inputKey = _input.GetInput();
-            _output.DisplayBlankLine();
-
             HandleInput(inputKey);
         }
     }
@@ -81,14 +70,14 @@ public class GameEngine(
                 ShowHint();
                 break;
             default:
-                _output.DisplayMessage(LanguageKey.InvalidInput);
+                _output.AddStatusMessage(LanguageKey.InvalidInput);
                 break;
         }
     }
 
     private void HandleMovementUp()
     {
-        _output.DisplayMessage(LanguageKey.CannotMoveUp);
+        _output.AddContextMessage(LanguageKey.CannotMoveUp);
     }
     
     private void HandleMovementDown()
@@ -112,14 +101,14 @@ public class GameEngine(
         // check if the hero can move left
         if (_state.Hero.MoveConstraint == MovementConstraint.Left)
         {
-            _output.DisplayMessage(LanguageKey.CannotMoveLeft);
+            _output.AddStatusMessage(LanguageKey.CannotMoveLeft);
             return;
         }
         
         // check array bounds
         if (_state.Hero.X - 1 < 0)
         {
-            _output.DisplayMessage(LanguageKey.CannotMoveThere);
+            _output.AddStatusMessage(LanguageKey.CannotMoveThere);
             return;
         }
         
@@ -129,22 +118,21 @@ public class GameEngine(
     
     private void HandleMovementRight()
     {
-        // check if the hero can move right
         if (_state.Hero.MoveConstraint == MovementConstraint.Right)
         {
-            _output.DisplayMessage(LanguageKey.CannotMoveRight);
-            return;
+            // check if the hero can move right
+            _output.AddStatusMessage(LanguageKey.CannotMoveRight);
         }
-        
-        // check array bounds
-        if (_state.Hero.X + 1 >= _state.Dungeon.Width)
+        else if (_state.Hero.X + 1 >= _state.Dungeon.Width)
         {
-            _output.DisplayMessage(LanguageKey.CannotMoveThere);
-            return;
+            // check array bounds
+            _output.AddStatusMessage(LanguageKey.CannotMoveThere);
         }
-        
-        _state.Hero.MoveRight();
-        ResolveCell();
+        else
+        {
+            _state.Hero.MoveRight();
+            ResolveCell();
+        }
     }
 
     private void ResolveCell()
@@ -154,27 +142,35 @@ public class GameEngine(
         switch (cell.Type)
         {
             case CellType.Monster:
-                _state.Hero.DecreaseHealth(cell.Value);
-                _output.DisplayMessage(LanguageKey.MonsterEncounter, cell.Value);
+                int monsterStrength = cell.Value;
+                _state.Hero.DecreaseHealth(monsterStrength);
                 ClearCell(cell, _state.Hero.Y, _state.Hero.X);
+                _output.SetState(_state);
+                _output.AddContextMessage(LanguageKey.MonsterEncounter, monsterStrength);
                 break;
             case CellType.Treasure:
-                _state.Hero.IncreaseScore(cell.Value);
-                _output.DisplayMessage(LanguageKey.TreasureFound, cell.Value);
+                int treasureValue = cell.Value;
+                _state.Hero.IncreaseScore(treasureValue);
                 ClearCell(cell, _state.Hero.Y, _state.Hero.X);
+                _output.SetState(_state);
+                _output.AddContextMessage(LanguageKey.TreasureFound, treasureValue);
+                break;
+            case CellType.Empty:
+                _output.SetState(_state);
+                _output.DisplayScreen();
                 break;
         }
     }
     
     private void GameOver()
     {
-        _output.DisplayMessage(LanguageKey.GameOver);
+        _output.AddContextMessage(LanguageKey.GameOver);
         Environment.Exit(0);
     }
     
     private void QuitGame()
     {
-        _output.DisplayMessage(LanguageKey.ThanksForPlaying);
+        _output.AddContextMessage(LanguageKey.ThanksForPlaying);
         Environment.Exit(0);
     }
 
@@ -182,15 +178,14 @@ public class GameEngine(
     {
         if (_state.Hero.NbHint <= 0)
         {
-            _output.DisplayMessage(LanguageKey.NoHintAvailable);
+            _output.AddStatusMessage(LanguageKey.NoHintAvailable);
         }
         else
         {
             _state.Hero.DecreaseHint();
-            _output.DisplayMessage(LanguageKey.CalculatingPerfectSolution);
+            _output.AddStatusMessage(LanguageKey.CalculatingPerfectSolution);
             var path = Algorithms.DP.PerfectSolution(_state);
-            _output.DisplayMessage(LanguageKey.PerfectPath, path);
-            _output.DisplayBlankLine();
+            _output.AddStatusMessage(LanguageKey.PerfectPath, path);
         }
     }
 
@@ -204,21 +199,17 @@ public class GameEngine(
 
     private void EndLevel()
     {
-        _output.DisplayBlankLine();
-        _output.DisplayMessage(LanguageKey.LevelCompleted);
-        _output.DisplayMessage(LanguageKey.YourScore, _state.Hero.Score);
-        _output.DisplayBlankLine();
+        _output.AddStatusMessage(LanguageKey.LevelCompleted);
+        _output.AddStatusMessage(LanguageKey.YourScore, _state.Hero.Score);
 
         if (_state.Hero.Score > _state.Dungeon.ScoreToBeat)
         {
             _state.Hero.AddHint();
-            _output.DisplayMessage(LanguageKey.BeatScore);
+            _output.AddStatusMessage(LanguageKey.BeatScore);
         }
         else
         {
-            _output.DisplayMessage(LanguageKey.DidNotBeatScore);
+            _output.AddStatusMessage(LanguageKey.DidNotBeatScore);
         }
-
-        _output.DisplayBlankLine();
     }
 }
