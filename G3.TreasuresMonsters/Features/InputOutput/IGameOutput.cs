@@ -10,4 +10,5 @@ public interface IGameOutput
     void DisplayMessage(LanguageKey key, params object[] args);
     void AddStatusMessage(LanguageKey key, params object[] args);
     void AddContextMessage(LanguageKey key, params object[] args);
+    void ClearContextMessages();
 }

@@ -44,7 +44,7 @@ public class LanguageService : ILanguageService
             LanguageKey.GameOver => "You are dead. Game over!",
             LanguageKey.ThanksForPlaying => "Thank you for playing!",
             LanguageKey.HeroStatus => "Health: {0} / 100 | Score: {1} | Hints: {2}",
-            LanguageKey.LevelEnd => "You are at the bottom of the dungeon. Press '↓' to move to the next level.",
+            LanguageKey.LevelEnd => "Press '↓' to move to the next level.",
             _ => key.ToString() // Return key name if not found
         };
     }
@@ -73,7 +73,7 @@ public class LanguageService : ILanguageService
             LanguageKey.GameOver => "Vous êtes mort. Fin du jeu !",
             LanguageKey.ThanksForPlaying => "Merci d'avoir joué !",
             LanguageKey.HeroStatus => "Vie : {0} / 100 | Score : {1} | Indices : {2}",
-            LanguageKey.LevelEnd => "Vous êtes en bas du donjon. Appuyez sur '↓' pour passer au niveau suivant.",
+            LanguageKey.LevelEnd => "Appuyez sur '↓' pour passer au niveau suivant.",
             _ => key.ToString() // Return key name if not found
         };
     }

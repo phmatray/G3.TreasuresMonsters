@@ -17,6 +17,10 @@ public class ConsoleGameOutput(ILanguageService language)
     {
         _currentState = state;
         
+        // Clear messages for the next frame
+        _statusMessages.Clear();
+        _dungeonRows.Clear();
+        
         AddStatusMessage(LanguageKey.Level, state.NbLevel);
         AddStatusMessage(LanguageKey.ScoreToBeat, state.Dungeon.ScoreToBeat);
         AddStatusMessage(LanguageKey.HeroStatus, state.Hero.Health, state.Hero.Score, state.Hero.NbHint);
@@ -51,16 +55,6 @@ public class ConsoleGameOutput(ILanguageService language)
         {
             Console.WriteLine(message);
         }
-        
-        // if (state.Hero.Y == state.Dungeon.Height)
-        // {
-        //     DisplayMessage(LanguageKey.LevelEnd);
-        // }
-        
-        // Clear messages for the next frame
-        _statusMessages.Clear();
-        // _contextMessages.Clear();
-        _dungeonRows.Clear();
     }
     
     private void BuildDungeonRows()
@@ -119,24 +113,30 @@ public class ConsoleGameOutput(ILanguageService language)
 
     public void AddStatusMessage(LanguageKey key, params object[] args)
     {
-        var format = language.GetString(key);
-        var message = string.Format(format, args);
+        var message = GetMessage(key, args);
         _statusMessages.Add(message);
     }
     
     public void AddContextMessage(LanguageKey key, params object[] args)
     {
-        var format = language.GetString(key);
-        var message = string.Format(format, args);
+        var message = GetMessage(key, args);
         _contextMessages.Add(message);
-        DisplayScreen();
+    }
+    
+    public void ClearContextMessages()
+    {
         _contextMessages.Clear();
     }
 
     public void DisplayMessage(LanguageKey key, params object?[] args)
     {
-        var format = language.GetString(key);
-        var message = string.Format(format, args);
+        var message = GetMessage(key, args);
         Console.WriteLine(message);
+    }
+    
+    private string GetMessage(LanguageKey key, params object?[] args)
+    {
+        var format = language.GetString(key);
+        return string.Format(format, args);
     }
 }
