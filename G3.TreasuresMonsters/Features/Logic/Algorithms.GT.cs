@@ -57,15 +57,15 @@ public static partial class Algorithms
             for (int i = 0; i < availablePositions.Length; i++)
             {
                 int x = availablePositions[i];
-                int randTreasure = Rng.Next(6);
-                int randMonster = Rng.Next(3);
+                bool isTreasure = Rng.Next(6) == 0;
+                bool isMonster = Rng.Next(3) == 0;
                 
-                if (randTreasure == 0 && treasureCount < 2) // 1 in 6 chance to place a treasure, max 2 treasures
+                if (isTreasure && treasureCount < 2) // 1 in 6 chance to place a treasure, max 2 treasures
                 {
                     treasuresRow[x] = Rng.Next(1, 100); // Random treasure value between 1 and 99
                     treasureCount++;
                 }
-                else if (randMonster == 0) // 1 in 3 chance to place a monster
+                else if (isMonster) // 1 in 3 chance to place a monster
                 {
                     monstersRow[x] = Rng.Next(1, 51); // Random monster strength between 1 and 50
                 }
