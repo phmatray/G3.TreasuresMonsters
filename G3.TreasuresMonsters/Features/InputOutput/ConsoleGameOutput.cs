@@ -28,7 +28,7 @@ public class ConsoleGameOutput(ILanguageService language)
         BuildDungeonRows();
     }
 
-    public void DisplayScreen()
+    public void DisplayScreen(bool clearContextMessages = false)
     {
         Console.Clear(); // Clear the console to update the screen
 
@@ -54,6 +54,12 @@ public class ConsoleGameOutput(ILanguageService language)
         foreach (var message in _contextMessages)
         {
             Console.WriteLine(message);
+        }
+        
+        // Clear context messages if requested
+        if (clearContextMessages)
+        {
+            _contextMessages.Clear();
         }
     }
     
@@ -121,11 +127,6 @@ public class ConsoleGameOutput(ILanguageService language)
     {
         var message = GetMessage(key, args);
         _contextMessages.Add(message);
-    }
-    
-    public void ClearContextMessages()
-    {
-        _contextMessages.Clear();
     }
 
     public void DisplayMessage(LanguageKey key, params object?[] args)

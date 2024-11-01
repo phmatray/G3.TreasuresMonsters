@@ -4,7 +4,6 @@ namespace G3.TreasuresMonsters.Features.Logic;
 
 public static partial class Algorithms
 {
-
     /* --- Dynamic Programming --- */
     public static class DP
     {
@@ -42,9 +41,9 @@ public static partial class Algorithms
             string bestPath = "";
 
             // Déplacements possibles : Bas, Gauche, Droite
-            int[] dx = { 0, -1, 1 };
-            int[] dy = { 1, 0, 0 };
-            char[] moveChar = { 'D', 'L', 'R' };
+            int[] dx = [0, -1, 1];
+            int[] dy = [1, 0, 0];
+            char[] moveChar = ['D', 'L', 'R'];
 
             DP_SearchMoves(x, y, health, state, memo, dx, dy, moveChar, 0, ref maxScore, ref bestPath);
 
