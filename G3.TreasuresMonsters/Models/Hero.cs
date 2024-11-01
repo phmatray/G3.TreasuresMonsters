@@ -19,11 +19,11 @@ public class Hero
     public int X { get; private set; }
     
     public int Y { get; private set; }
-    
+
     /// <summary>
     /// Number of hints available to the player
     /// </summary>
-    public int NbHint { get; private set; }
+    public int NbHint { get; private set; } = 1;
 
     public void SetPosition(int newX, int newY)
     {

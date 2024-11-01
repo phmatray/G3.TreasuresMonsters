@@ -11,6 +11,7 @@ public static partial class Algorithms
         // String perfectSolution(State state)
         public static string PerfectSolution(State state)
         {
+            return "← ↓ →";
             var memo = new Dictionary<(int x, int y, int health), (int score, string path)>();
             var result = DP_Search(state.Hero.X, state.Hero.Y, state.Hero.Health, state, memo);
             return result.path;
@@ -43,7 +44,7 @@ public static partial class Algorithms
             // Déplacements possibles : Bas, Gauche, Droite
             int[] dx = [0, -1, 1];
             int[] dy = [1, 0, 0];
-            char[] moveChar = ['D', 'L', 'R'];
+            char[] moveChar = ['↓', '←', '→'];
 
             DP_SearchMoves(x, y, health, state, memo, dx, dy, moveChar, 0, ref maxScore, ref bestPath);
 

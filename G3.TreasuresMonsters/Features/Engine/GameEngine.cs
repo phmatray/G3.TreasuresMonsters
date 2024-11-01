@@ -27,7 +27,7 @@ public class GameEngine(
         _state.Dungeon.ScoreToBeat = Algorithms.GS.GreedySolution(_state);
         
         _output.SetState(_state);
-        _output.DisplayScreen();
+        _output.DisplayScreen(false);
         
         PlayLevel();
     }
@@ -78,7 +78,7 @@ public class GameEngine(
     private void HandleMovementUp()
     {
         _output.AddContextMessage(LanguageKey.CannotMoveUp);
-        _output.DisplayScreen(true);
+        _output.DisplayScreen();
     }
     
     private void HandleMovementDown()
@@ -103,13 +103,13 @@ public class GameEngine(
         {
             // check if the hero can move left
             _output.AddContextMessage(LanguageKey.CannotMoveLeft);
-            _output.DisplayScreen(true);
+            _output.DisplayScreen();
         }
         else if (_state.Hero.X - 1 < 0)
         {
             // check array bounds
             _output.AddContextMessage(LanguageKey.CannotMoveThere);
-            _output.DisplayScreen(true);
+            _output.DisplayScreen();
         }
         else
         {
@@ -124,13 +124,13 @@ public class GameEngine(
         {
             // check if the hero can move right
             _output.AddContextMessage(LanguageKey.CannotMoveRight);
-            _output.DisplayScreen(true);
+            _output.DisplayScreen();
         }
         else if (_state.Hero.X + 1 >= _state.Dungeon.Width)
         {
             // check array bounds
             _output.AddContextMessage(LanguageKey.CannotMoveThere);
-            _output.DisplayScreen(true);
+            _output.DisplayScreen();
         }
         else
         {
@@ -151,7 +151,7 @@ public class GameEngine(
                 ClearCell(cell, _state.Hero.Y, _state.Hero.X);
                 _output.SetState(_state);
                 _output.AddContextMessage(LanguageKey.MonsterEncounter, monsterStrength);
-                _output.DisplayScreen(true);
+                _output.DisplayScreen();
                 break;
             case CellType.Treasure:
                 int treasureValue = cell.Value;
@@ -159,48 +159,50 @@ public class GameEngine(
                 ClearCell(cell, _state.Hero.Y, _state.Hero.X);
                 _output.SetState(_state);
                 _output.AddContextMessage(LanguageKey.TreasureFound, treasureValue);
-                _output.DisplayScreen(true);
+                _output.DisplayScreen();
                 break;
             case CellType.Empty:
                 _output.SetState(_state);
-                _output.DisplayScreen();
+                _output.DisplayScreen(false);
                 break;
         }
         
         if (_state.Hero.Y == _state.Dungeon.Height - 1)
         {
             _output.AddContextMessage(LanguageKey.LevelEnd);
-            _output.DisplayScreen(true);
+            _output.DisplayScreen();
         }
     }
     
     private void GameOver()
     {
         _output.AddContextMessage(LanguageKey.GameOver);
-        _output.DisplayScreen(true);
+        _output.DisplayScreen();
         Environment.Exit(0);
     }
     
     private void QuitGame()
     {
         _output.AddContextMessage(LanguageKey.ThanksForPlaying);
-        _output.DisplayScreen(true);
+        _output.DisplayScreen();
         Environment.Exit(0);
     }
 
     private void ShowHint()
     {
-        if (_state.Hero.NbHint <= 0)
+        if (_state.Hero.NbHint > 0)
         {
-            _output.AddStatusMessage(LanguageKey.NoHintAvailable);
+            _state.Hero.DecreaseHint();
+            var path = Algorithms.DP.PerfectSolution(_state);
+            _output.AddStatusMessage(LanguageKey.PerfectPath, path);
+            _output.AddContextMessage(LanguageKey.HintUsed);
         }
         else
         {
-            _state.Hero.DecreaseHint();
-            _output.AddStatusMessage(LanguageKey.CalculatingPerfectSolution);
-            var path = Algorithms.DP.PerfectSolution(_state);
-            _output.AddStatusMessage(LanguageKey.PerfectPath, path);
+            _output.AddContextMessage(LanguageKey.NoHintAvailable);
         }
+
+        _output.DisplayScreen();
     }
 
     private void ClearCell(Cell cell, int y, int x)
@@ -226,6 +228,6 @@ public class GameEngine(
             _output.AddContextMessage(LanguageKey.DidNotBeatScore);
         }
         
-        _output.DisplayScreen(true);
+        _output.DisplayScreen();
     }
 }

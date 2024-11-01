@@ -13,7 +13,7 @@ public enum LanguageKey
     MonsterEncounter,
     TreasureFound,
     NoHintAvailable,
-    CalculatingPerfectSolution,
+    HintUsed,
     PerfectPath,
     LevelCompleted,
     YourScore,

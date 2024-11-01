@@ -28,7 +28,7 @@ public class ConsoleGameOutput(ILanguageService language)
         BuildDungeonRows();
     }
 
-    public void DisplayScreen(bool clearContextMessages = false)
+    public void DisplayScreen(bool clearContextMessages = true)
     {
         Console.Clear(); // Clear the console to update the screen
 
