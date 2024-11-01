@@ -136,7 +136,7 @@ public class State
         Monsters = new int[Constants.DungeonHeight][];
         Treasures = new int[Constants.DungeonHeight][];
         
-        // Initialiser les tableaux des monstres et des trésors
+        // Initialize the monsters and treasures
         for (int i = 0; i < Constants.DungeonHeight; i++)
         {
             Monsters[i] = new int[Constants.DungeonWidth];
@@ -146,11 +146,26 @@ public class State
         Algorithms.GT.GenerateMonstersAndTreasures(Monsters, Treasures);
         Algorithms.DC.SortLevel(Monsters, Treasures); // Trier le niveau après la génération
         
-        // TODO: Fix the hero position
-        // If the hero is on a monster or a treasure, move the obstacle to a free cell on the top row
+        // Initialize the hero's position
         HeroPos = [Constants.DungeonWidth / 2, 0];
-        Monsters[HeroY][HeroX] = 0;
-        Treasures[HeroY][HeroX] = 0;
+
+        // If the hero is on a monster or a treasure, move the obstacle to the first free cell on the top row
+        if (Monsters[HeroY][HeroX] > 0 || Treasures[HeroY][HeroX] > 0)
+        {
+            for (int x = 0; x < Constants.DungeonWidth; x++)
+            {
+                if (Monsters[0][x] != 0 || Treasures[0][x] != 0)
+                {
+                    continue;
+                }
+                
+                Monsters[0][x] = Monsters[HeroY][HeroX];
+                Treasures[0][x] = Treasures[HeroY][HeroX];
+                Monsters[HeroY][HeroX] = 0;
+                Treasures[HeroY][HeroX] = 0;
+                break;
+            }
+        }
         
         // TODO: Calculate the score to beat
         DungeonScoreToBeat = Algorithms.GS.GreedySolution(this);
