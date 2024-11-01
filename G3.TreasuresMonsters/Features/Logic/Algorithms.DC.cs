@@ -10,102 +10,110 @@ public static partial class Algorithms
         public static void SortLevel(int[][] monstersToSort, int[][] treasuresToSort)
         {
             int height = monstersToSort.Length;
+            int[] rowValues = new int[height];
+            int[] indices = new int[height];
 
-            // Créer une liste des rangées avec leur valeur
-            var rows = new List<(int index, int rowValue)>();
-            ComputeRowValues(monstersToSort, treasuresToSort, 0, height, rows);
-
-            // Trier les rangées avec un tri fusion récursif
-            var sortedRows = MergeSortRows(rows);
-
-            // Reconstruire les tableaux avec les rangées triées
-            RebuildArrays(monstersToSort, treasuresToSort, sortedRows, 0);
-        }
-
-        // Méthodes utilitaires récursives pour DC
-        private static void ComputeRowValues(int[][] monsters, int[][] treasures, int y, int height, List<(int index, int rowValue)> rows)
-        {
-            if (y >= height)
-                return;
-
-            int totalTreasure = 0;
-            int totalMonsters = 0;
-
-            ComputeRowValuesHelper(monsters[y], treasures[y], 0, ref totalTreasure, ref totalMonsters);
-
-            int rowValue = totalTreasure - totalMonsters;
-            rows.Add((y, rowValue));
-
-            ComputeRowValues(monsters, treasures, y + 1, height, rows);
-        }
-
-        private static void ComputeRowValuesHelper(int[] monstersRow, int[] treasuresRow, int x, ref int totalTreasure, ref int totalMonsters)
-        {
-            if (x >= monstersRow.Length)
-                return;
-
-            if (treasuresRow[x] > 0)
-                totalTreasure += treasuresRow[x];
-            if (monstersRow[x] > 0)
-                totalMonsters += monstersRow[x];
-
-            ComputeRowValuesHelper(monstersRow, treasuresRow, x + 1, ref totalTreasure, ref totalMonsters);
-        }
-
-        private static List<(int index, int rowValue)> MergeSortRows(List<(int index, int rowValue)> rows)
-        {
-            if (rows.Count <= 1)
-                return rows;
-
-            int mid = rows.Count / 2;
-            var left = MergeSortRows(rows.GetRange(0, mid));
-            var right = MergeSortRows(rows.GetRange(mid, rows.Count - mid));
-
-            return Merge(left, right);
-        }
-
-        private static List<(int index, int rowValue)> Merge(List<(int index, int rowValue)> left, List<(int index, int rowValue)> right)
-        {
-            var result = new List<(int index, int rowValue)>();
-            MergeHelper(left, right, result, 0, 0);
-            return result;
-        }
-
-        private static void MergeHelper(List<(int index, int rowValue)> left, List<(int index, int rowValue)> right, List<(int index, int rowValue)> result, int i, int j)
-        {
-            if (i >= left.Count && j >= right.Count)
-                return;
-
-            if (i < left.Count && (j >= right.Count || left[i].rowValue <= right[j].rowValue))
+            // Compute row values and initialize indices
+            for (int i = 0; i < height; i++)
             {
-                result.Add(left[i]);
-                MergeHelper(left, right, result, i + 1, j);
+                int monsterSum = SumArray(monstersToSort[i]);
+                int treasureSum = SumArray(treasuresToSort[i]);
+                rowValues[i] = treasureSum - monsterSum;
+                indices[i] = i;
             }
-            else
+
+            // Perform recursive merge sort on indices based on rowValues
+            MergeSort(indices, rowValues, 0, indices.Length - 1);
+
+            // Rebuild the arrays with sorted rows
+            RebuildArrays(monstersToSort, treasuresToSort, indices);
+        }
+
+        // Method to sum array elements
+        internal static int SumArray(int[] array)
+        {
+            int sum = 0;
+            for (int i = 0; i < array.Length; i++)
             {
-                result.Add(right[j]);
-                MergeHelper(left, right, result, i, j + 1);
+                sum += array[i];
+            }
+
+            return sum;
+        }
+
+        // Recursive merge sort implementation on indices
+        internal static void MergeSort(int[] indices, int[] rowValues, int left, int right)
+        {
+            if (left >= right)
+                return;
+
+            int mid = left + (right - left) / 2;
+            MergeSort(indices, rowValues, left, mid);
+            MergeSort(indices, rowValues, mid + 1, right);
+            Merge(indices, rowValues, left, mid, right);
+        }
+
+        // Merge two sorted subarrays
+        internal static void Merge(int[] indices, int[] rowValues, int left, int mid, int right)
+        {
+            int leftSize = mid - left + 1;
+            int rightSize = right - mid;
+
+            int[] leftIndices = new int[leftSize];
+            int[] rightIndices = new int[rightSize];
+
+            // Copy data to temporary arrays
+            for (int i = 0; i < leftSize; i++)
+                leftIndices[i] = indices[left + i];
+            for (int j = 0; j < rightSize; j++)
+                rightIndices[j] = indices[mid + 1 + j];
+
+            int iLeft = 0, iRight = 0, k = left;
+
+            // Merge the temp arrays back into indices
+            while (iLeft < leftSize && iRight < rightSize)
+            {
+                if (rowValues[leftIndices[iLeft]] <= rowValues[rightIndices[iRight]])
+                {
+                    indices[k++] = leftIndices[iLeft++];
+                }
+                else
+                {
+                    indices[k++] = rightIndices[iRight++];
+                }
+            }
+
+            // Copy any remaining elements of leftIndices
+            while (iLeft < leftSize)
+            {
+                indices[k++] = leftIndices[iLeft++];
+            }
+
+            // Copy any remaining elements of rightIndices
+            while (iRight < rightSize)
+            {
+                indices[k++] = rightIndices[iRight++];
             }
         }
 
-        private static void RebuildArrays(int[][] monsters, int[][] treasures, List<(int index, int rowValue)> sortedRows, int i)
+        // Rebuild the original arrays based on sorted indices
+        internal static void RebuildArrays(int[][] monsters, int[][] treasures, int[] indices)
         {
-            if (i >= sortedRows.Count)
-                return;
+            int[][] sortedMonsters = new int[monsters.Length][];
+            int[][] sortedTreasures = new int[treasures.Length][];
 
-            CopyRow(monsters, sortedRows[i].index, i, 0);
-            CopyRow(treasures, sortedRows[i].index, i, 0);
+            for (int i = 0; i < indices.Length; i++)
+            {
+                sortedMonsters[i] = monsters[indices[i]];
+                sortedTreasures[i] = treasures[indices[i]];
+            }
 
-            RebuildArrays(monsters, treasures, sortedRows, i + 1);
-        }
-
-        private static void CopyRow(int[][] array, int srcRow, int destRow, int x)
-        {
-            if (x >= array[srcRow].Length)
-                return;
-
-            array[destRow][x] = array[srcRow][x];
-            CopyRow(array, srcRow, destRow, x + 1);
+            // Copy sorted arrays back to original arrays
+            for (int i = 0; i < monsters.Length; i++)
+            {
+                monsters[i] = sortedMonsters[i];
+                treasures[i] = sortedTreasures[i];
+            }
         }
     }
 }

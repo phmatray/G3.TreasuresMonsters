@@ -43,7 +43,7 @@ public class Dungeon
         }
 
         Algorithms.GT.GenerateMonstersAndTreasures(Monsters, Treasures);
-        // Algorithms.DC.SortLevel(Monsters, Treasures); // Trier le niveau après la génération
+        Algorithms.DC.SortLevel(Monsters, Treasures); // Trier le niveau après la génération
 
         BuildGridFromArrays();
     }
