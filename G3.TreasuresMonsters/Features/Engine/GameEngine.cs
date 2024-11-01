@@ -1,7 +1,3 @@
-using G3.TreasuresMonsters.Features.I18n;
-using G3.TreasuresMonsters.Features.InputOutput;
-using G3.TreasuresMonsters.Features.Logic;
-using G3.TreasuresMonsters.Models;
 // ReSharper disable InconsistentNaming
 
 namespace G3.TreasuresMonsters.Features.Engine;
@@ -10,21 +6,30 @@ public class GameEngine(
     IGameInput _input,
     IGameOutput _output)
 {
-    private readonly State _state = new();
+    private State _state = null!;
     
     public void StartNewGame()
     {
+        InitializeState();
         StartNewLevel();
+    }
+
+    private void InitializeState()
+    {
+        _state = new State(
+            [0, 0],
+            Constants.MaxHealth,
+            0,
+            [],
+            [],
+            1,
+            1
+        );
     }
 
     private void StartNewLevel()
     {
-        _state.Dungeon = new Dungeon();
-        _state.Hero.SetPosition(_state.Dungeon.Width / 2, 0);
-        _state.Hero.GainHealth(50);
-        _state.Dungeon.Monsters[_state.Hero.Y][_state.Hero.X] = 0;
-        _state.Dungeon.Treasures[_state.Hero.Y][_state.Hero.X] = 0;
-        _state.Dungeon.ScoreToBeat = Algorithms.GS.GreedySolution(_state);
+        _state.InitializeDungeon();
         
         _output.SetState(_state);
         _output.DisplayScreen(false);
@@ -36,7 +41,7 @@ public class GameEngine(
     {
         while (true)
         {
-            if (_state.Hero.IsDead)
+            if (_state.HeroIsDead)
             {
                 GameOver();
             }
@@ -83,12 +88,12 @@ public class GameEngine(
     
     private void HandleMovementDown()
     {
-        _state.Hero.MoveDown();
+        _state.MoveHeroDown();
             
-        if (_state.Hero.Y >= _state.Dungeon.Height)
+        if (_state.HeroY >= Constants.DungeonHeight)
         {
             EndLevel();
-            _state.NbLevel++;
+            _state.IncreaseCurrentLevel();
             StartNewLevel();
         }
         else
@@ -99,13 +104,13 @@ public class GameEngine(
 
     private void HandleMovementLeft()
     {
-        if (_state.Hero.MoveConstraint == MovementConstraint.Left)
+        if (_state.HeroMoveConstraint == MovementConstraint.Left)
         {
             // check if the hero can move left
             _output.AddContextMessage(LanguageKey.CannotMoveLeft);
             _output.DisplayScreen();
         }
-        else if (_state.Hero.X - 1 < 0)
+        else if (_state.HeroX - 1 < 0)
         {
             // check array bounds
             _output.AddContextMessage(LanguageKey.CannotMoveThere);
@@ -113,20 +118,20 @@ public class GameEngine(
         }
         else
         {
-            _state.Hero.MoveLeft();
+            _state.MoveHeroLeft();
             ResolveCell();
         }
     }
 
     private void HandleMovementRight()
     {
-        if (_state.Hero.MoveConstraint == MovementConstraint.Right)
+        if (_state.HeroMoveConstraint == MovementConstraint.Right)
         {
             // check if the hero can move right
             _output.AddContextMessage(LanguageKey.CannotMoveRight);
             _output.DisplayScreen();
         }
-        else if (_state.Hero.X + 1 >= _state.Dungeon.Width)
+        else if (_state.HeroX + 1 >= Constants.DungeonWidth)
         {
             // check array bounds
             _output.AddContextMessage(LanguageKey.CannotMoveThere);
@@ -134,40 +139,38 @@ public class GameEngine(
         }
         else
         {
-            _state.Hero.MoveRight();
+            _state.MoveHeroRight();
             ResolveCell();
         }
     }
 
     private void ResolveCell()
     {
-        Cell cell = _state.Dungeon.Grid[_state.Hero.Y, _state.Hero.X];
-
-        switch (cell.Type)
+        if (_state.Monsters[_state.HeroY][_state.HeroX] > 0)
         {
-            case CellType.Monster:
-                int monsterStrength = cell.Value;
-                _state.Hero.DecreaseHealth(monsterStrength);
-                ClearCell(cell, _state.Hero.Y, _state.Hero.X);
-                _output.SetState(_state);
-                _output.AddContextMessage(LanguageKey.MonsterEncounter, monsterStrength);
-                _output.DisplayScreen();
-                break;
-            case CellType.Treasure:
-                int treasureValue = cell.Value;
-                _state.Hero.IncreaseScore(treasureValue);
-                ClearCell(cell, _state.Hero.Y, _state.Hero.X);
-                _output.SetState(_state);
-                _output.AddContextMessage(LanguageKey.TreasureFound, treasureValue);
-                _output.DisplayScreen();
-                break;
-            case CellType.Empty:
-                _output.SetState(_state);
-                _output.DisplayScreen(false);
-                break;
+            int monsterStrength = _state.Monsters[_state.HeroY][_state.HeroX];
+            _state.DecreaseHeroHealth(monsterStrength);
+            _state.Monsters[_state.HeroY][_state.HeroX] = 0;
+            _output.SetState(_state);
+            _output.AddContextMessage(LanguageKey.MonsterEncounter, monsterStrength);
+            _output.DisplayScreen();
+        }
+        else if (_state.Treasures[_state.HeroY][_state.HeroX] > 0)
+        {
+            int treasureValue = _state.Treasures[_state.HeroY][_state.HeroX];
+            _state.IncreaseHeroScore(treasureValue);
+            _state.Treasures[_state.HeroY][_state.HeroX] = 0;
+            _output.SetState(_state);
+            _output.AddContextMessage(LanguageKey.TreasureFound, treasureValue);
+            _output.DisplayScreen();
+        }
+        else
+        {
+            _output.SetState(_state);
+            _output.DisplayScreen(false);
         }
         
-        if (_state.Hero.Y == _state.Dungeon.Height - 1)
+        if (_state.HeroY == Constants.DungeonHeight - 1)
         {
             _output.AddContextMessage(LanguageKey.LevelEnd);
             _output.DisplayScreen();
@@ -190,9 +193,9 @@ public class GameEngine(
 
     private void ShowHint()
     {
-        if (_state.Hero.NbHint > 0)
+        if (_state.NbHint > 0)
         {
-            _state.Hero.DecreaseHint();
+            _state.DecreaseHint();
             var path = Algorithms.DP.PerfectSolution(_state);
             _output.AddStatusMessage(LanguageKey.PerfectPath, path);
             _output.AddContextMessage(LanguageKey.HintUsed);
@@ -205,22 +208,14 @@ public class GameEngine(
         _output.DisplayScreen();
     }
 
-    private void ClearCell(Cell cell, int y, int x)
-    {
-        cell.Type = CellType.Empty;
-        cell.Value = 0;
-        _state.Dungeon.Monsters[y][x] = 0;
-        _state.Dungeon.Treasures[y][x] = 0;
-    }
-
     private void EndLevel()
     {
         _output.AddContextMessage(LanguageKey.LevelCompleted);
-        _output.AddContextMessage(LanguageKey.YourScore, _state.Hero.Score);
+        _output.AddContextMessage(LanguageKey.YourScore, _state.HeroScore);
 
-        if (_state.Hero.Score > _state.Dungeon.ScoreToBeat)
+        if (_state.HeroScore > _state.DungeonScoreToBeat)
         {
-            _state.Hero.AddHint();
+            _state.AddHint();
             _output.AddContextMessage(LanguageKey.BeatScore);
         }
         else

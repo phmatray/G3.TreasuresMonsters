@@ -1,8 +1,3 @@
-using System.Text;
-using G3.TreasuresMonsters.Features.Engine;
-using G3.TreasuresMonsters.Features.I18n;
-using G3.TreasuresMonsters.Models;
-
 namespace G3.TreasuresMonsters.Features.InputOutput;
 
 public class ConsoleGameOutput(ILanguageService language)
@@ -22,8 +17,8 @@ public class ConsoleGameOutput(ILanguageService language)
         _dungeonRows.Clear();
         
         AddStatusMessage(LanguageKey.Level, state.NbLevel);
-        AddStatusMessage(LanguageKey.ScoreToBeat, state.Dungeon.ScoreToBeat);
-        AddStatusMessage(LanguageKey.HeroStatus, state.Hero.Health, state.Hero.Score, state.Hero.NbHint);
+        AddStatusMessage(LanguageKey.ScoreToBeat, state.DungeonScoreToBeat);
+        AddStatusMessage(LanguageKey.HeroStatus, state.HeroHealth, state.HeroScore, state.NbHint);
 
         BuildDungeonRows();
     }
@@ -71,49 +66,58 @@ public class ConsoleGameOutput(ILanguageService language)
         }
         
         // Build the top row of the dungeon
-        string topWall = "╔" + new string('═', (_currentState.Dungeon.Width * 5) + 1) + "╗";
+        string topWall = 
+            Constants.WallCornerTopLeft +
+            new string(Constants.WallTop[0], Constants.DungeonWidth * 5 + 1) +
+            Constants.WallCornerTopRight;
+        
         _dungeonRows.Add(topWall);
 
         // Build the center of the dungeon
-        for (int y = 0; y < _currentState.Dungeon.Height; y++)
+        for (int y = 0; y < Constants.DungeonHeight; y++)
         {
             int rowValue = 0;
             StringBuilder row = new();
-            row.Append("║ "); // Left wall
-            
-            for (int x = 0; x < _currentState.Dungeon.Width; x++)
+            row.Append($"{Constants.WallLeft} "); // Left wall
+
+            for (int x = 0; x < Constants.DungeonWidth; x++)
             {
-                if (_currentState.Hero.X == x && _currentState.Hero.Y == y)
+                var monsterStrength = _currentState.Monsters[y][x];
+                var treasureValue = _currentState.Treasures[y][x];
+
+                if (_currentState.HeroX == x && _currentState.HeroY == y)
                 {
-                    row.Append("🦄   "); // Hero emoji with consistent spacing
+                    row.Append($"{Constants.GetHeroEmoji(_currentState.HeroIsAlive)}   "); // Hero emoji with consistent spacing
+                }
+                else if (monsterStrength > 0)
+                {
+                    row.Append(Constants.GetMonsterEmoji(monsterStrength)); // Monster emoji
+                    row.Append($"{monsterStrength:D2} "); // Monster strength
+                    rowValue -= monsterStrength;
+                }
+                else if (treasureValue > 0)
+                {
+                    row.Append(Constants.GetTreasureEmoji(treasureValue)); // Treasure emoji
+                    row.Append($"{treasureValue:D2} "); // Treasure value
+                    rowValue += treasureValue;
                 }
                 else
                 {
-                    Cell cell = _currentState.Dungeon.Grid[y, x];
-                    switch (cell.Type)
-                    {
-                        case CellType.Empty:
-                            row.Append(".    ");
-                            break;
-                        case CellType.Monster:
-                            row.Append($"👹{cell.Value:D2} "); // Monster emoji with strength
-                            rowValue -= cell.Value;
-                            break;
-                        case CellType.Treasure:
-                            row.Append($"💰{cell.Value:D2} "); // Treasure emoji with value
-                            rowValue += cell.Value;
-                            break;
-                    }
+                    row.Append($"{Constants.EmptyCell}    ");
                 }
             }
-            
-            row.Append('║'); // Right wall
+
+            row.Append(Constants.WallRight); // Right wall
             row.Append($" {rowValue:D3}"); // Row value
             _dungeonRows.Add(row.ToString());
         }
 
         // Build the bottom row of the dungeon
-        string bottomWall = "╚" + new string('═', (_currentState.Dungeon.Width * 5) + 1) + "╝";
+        string bottomWall = 
+            Constants.WallCornerBottomLeft +
+            new string(Constants.WallBottom[0], Constants.DungeonWidth * 5 + 1) +
+            Constants.WallCornerBottomRight;
+
         _dungeonRows.Add(bottomWall);
     }
 

@@ -1,7 +1,7 @@
-﻿using G3.TreasuresMonsters.Features.Engine;
-using G3.TreasuresMonsters.Features.I18n;
-using G3.TreasuresMonsters.Features.InputOutput;
+﻿using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
+
+[assembly: InternalsVisibleTo("G3.TreasuresMonsters.Tests")]
 
 new ServiceCollection()
     .AddSingleton<IGameInput, ConsoleGameInput>()

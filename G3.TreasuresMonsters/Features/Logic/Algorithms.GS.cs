@@ -1,5 +1,3 @@
-using G3.TreasuresMonsters.Features.Engine;
-
 namespace G3.TreasuresMonsters.Features.Logic;
 
 public static partial class Algorithms
@@ -11,14 +9,14 @@ public static partial class Algorithms
         // int greedySolution(State state)
         public static int GreedySolution(State state)
         {
-            int maxScore = GreedySearch(state.Hero.X, state.Hero.Y, state.Hero.Health, 0, state, 5);
+            int maxScore = GreedySearch(state.HeroX, state.HeroY, state.HeroHealth, 0, state, 5);
             return maxScore;
         }
 
         // Méthodes utilitaires récursives pour GS
         private static int GreedySearch(int x, int y, int health, int treasureCollected, State state, int depth)
         {
-            if (depth == 0 || y >= state.Dungeon.Monsters.Length || health <= 0)
+            if (depth == 0 || y >= state.Monsters.Length || health <= 0)
             {
                 return health + treasureCollected;
             }
@@ -42,21 +40,22 @@ public static partial class Algorithms
             int nx = x + dx[i];
             int ny = y + dy[i];
 
-            int width = state.Dungeon.Monsters[0].Length;
-            int height = state.Dungeon.Monsters.Length;
+            int width = state.Monsters[0].Length;
+            int height = state.Monsters.Length;
 
             if (nx >= 0 && nx < width && ny >= 0 && ny < height)
             {
                 int newHealth = health;
                 int newTreasureCollected = treasureCollected;
 
-                if (state.Dungeon.Monsters[ny][nx] > 0)
+                if (state.Monsters[ny][nx] > 0)
                 {
-                    newHealth -= state.Dungeon.Monsters[ny][nx];
+                    newHealth -= state.Monsters[ny][nx];
                 }
-                if (state.Dungeon.Treasures[ny][nx] > 0)
+                
+                if (state.Treasures[ny][nx] > 0)
                 {
-                    newTreasureCollected += state.Dungeon.Treasures[ny][nx];
+                    newTreasureCollected += state.Treasures[ny][nx];
                 }
 
                 if (newHealth > 0)

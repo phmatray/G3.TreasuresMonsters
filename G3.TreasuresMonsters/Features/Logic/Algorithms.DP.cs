@@ -1,6 +1,11 @@
-using G3.TreasuresMonsters.Features.Engine;
-
 namespace G3.TreasuresMonsters.Features.Logic;
+
+public record MemoKey(int X, int Y, int Health);
+
+public record MemoValue(int Health, int TreasureCollected, string Path)
+{
+    public int TotalScore => Health + TreasureCollected;
+}
 
 public static partial class Algorithms
 {
@@ -11,86 +16,99 @@ public static partial class Algorithms
         // String perfectSolution(State state)
         public static string PerfectSolution(State state)
         {
-            return "← ↓ →";
-            var memo = new Dictionary<(int x, int y, int health), (int score, string path)>();
-            var result = DP_Search(state.Hero.X, state.Hero.Y, state.Hero.Health, state, memo);
-            return result.path;
+            var memo = new Dictionary<MemoKey, MemoValue>();
+            var result = DP_Search(state.HeroX, state.HeroY, state.HeroHealth, state, memo);
+            return result?.Path ?? "";
         }
 
-        // Méthodes utilitaires récursives pour DP
-        public static (int score, string path) DP_Search(int x, int y, int health, State state, Dictionary<(int x, int y, int health), (int score, string path)> memo)
+        // Recursive method to search for the best path
+        private static MemoValue DP_Search(int x, int y, int health, State state, Dictionary<MemoKey, MemoValue> memo)
         {
-            int height = state.Dungeon.Monsters.Length;
+            int height = state.Monsters.Length;
+            int width = state.Monsters[0].Length;
+
+            // Base cases
+            if (health <= 0)
+            {
+                // Hero is dead
+                return null;
+            }
 
             if (y >= height)
             {
-                return (health, "");
+                // Reached the end of the dungeon successfully
+                return new MemoValue(health, 0, "");
             }
 
-            if (health <= 0)
+            var key = new MemoKey(x, y, health);
+
+            if (memo.TryGetValue(key, out MemoValue memoizedResult))
             {
-                return (int.MinValue, "");
+                // Return the memoized result
+                return memoizedResult;
             }
 
-            var key = (x, y, health);
-            if (memo.ContainsKey(key))
+            MemoValue bestResult = null;
+
+            // Possible moves: Down, Left, Right
+            int[] dx = { 0, -1, 1 };
+            int[] dy = { 1, 0, 0 };
+            char[] moveChar = { '↓', '←', '→' };
+
+            for (int i = 0; i < dx.Length; i++)
             {
-                return memo[key];
-            }
+                int nx = x + dx[i];
+                int ny = y + dy[i];
 
-            int maxScore = int.MinValue;
-            string bestPath = "";
-
-            // Déplacements possibles : Bas, Gauche, Droite
-            int[] dx = [0, -1, 1];
-            int[] dy = [1, 0, 0];
-            char[] moveChar = ['↓', '←', '→'];
-
-            DP_SearchMoves(x, y, health, state, memo, dx, dy, moveChar, 0, ref maxScore, ref bestPath);
-
-            memo[key] = (maxScore, bestPath);
-            return (maxScore, bestPath);
-        }
-
-        private static void DP_SearchMoves(int x, int y, int health, State state, Dictionary<(int x, int y, int health), (int score, string path)> memo, int[] dx, int[] dy, char[] moveChar, int i, ref int maxScore, ref string bestPath)
-        {
-            if (i >= dx.Length)
-                return;
-
-            int nx = x + dx[i];
-            int ny = y + dy[i];
-
-            int width = state.Dungeon.Monsters[0].Length;
-
-            if (nx >= 0 && nx < width && ny >= 0)
-            {
-                int newHealth = health;
-                int treasureCollected = 0;
-
-                if (state.Dungeon.Monsters[ny][nx] > 0)
+                if (IsInBounds(nx, ny, width, height))
                 {
-                    newHealth -= state.Dungeon.Monsters[ny][nx];
-                }
-                if (state.Dungeon.Treasures[ny][nx] > 0)
-                {
-                    treasureCollected += state.Dungeon.Treasures[ny][nx];
-                }
+                    int newHealth = health;
+                    int treasureCollected = 0;
 
-                if (newHealth > 0)
-                {
+                    // Apply the effects of the cell
+                    ApplyCellEffects(nx, ny, state, ref newHealth, ref treasureCollected);
+
                     var result = DP_Search(nx, ny, newHealth, state, memo);
 
-                    int totalScore = result.score + treasureCollected;
-
-                    if (totalScore > maxScore)
+                    if (result != null)
                     {
-                        maxScore = totalScore;
-                        bestPath = moveChar[i] + result.path;
+                        int totalHealth = result.Health;
+                        int totalTreasure = result.TreasureCollected + treasureCollected;
+                        int totalScore = totalHealth + totalTreasure;
+
+                        if (bestResult == null || totalScore > bestResult.TotalScore)
+                        {
+                            bestResult = new MemoValue(totalHealth, totalTreasure, moveChar[i] + result.Path);
+                        }
                     }
                 }
             }
 
-            DP_SearchMoves(x, y, health, state, memo, dx, dy, moveChar, i + 1, ref maxScore, ref bestPath);
+            // Update memoization dictionary
+            memo[key] = bestResult ?? new MemoValue(0, 0, "");
+
+            return memo[key];
+        }
+
+        // Check if the next position is within bounds
+        private static bool IsInBounds(int x, int y, int width, int height)
+        {
+            return x >= 0 && x < width && y >= 0;
+        }
+
+        // Apply the effects of the cell (monsters and treasures)
+        private static void ApplyCellEffects(int x, int y, State state, ref int health, ref int treasureCollected)
+        {
+            int height = state.Monsters.Length;
+
+            if (y < height)
+            {
+                // Subtract monster strength from health
+                health -= state.Monsters[y][x];
+
+                // Add treasure value to treasureCollected
+                treasureCollected += state.Treasures[y][x];
+            }
         }
     }
 }

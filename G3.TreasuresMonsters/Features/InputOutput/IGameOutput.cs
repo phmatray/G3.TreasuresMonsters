@@ -1,6 +1,3 @@
-using G3.TreasuresMonsters.Features.Engine;
-using G3.TreasuresMonsters.Features.I18n;
-
 namespace G3.TreasuresMonsters.Features.InputOutput;
 
 public interface IGameOutput

@@ -1,7 +1,3 @@
-using System.Runtime.CompilerServices;
-
-[assembly: InternalsVisibleTo("G3.TreasuresMonsters.Tests")]
-
 namespace G3.TreasuresMonsters.Features.Logic;
 
 public static partial class Algorithms
