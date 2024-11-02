@@ -6,7 +6,7 @@ public class ConsoleGameOutput(ILanguageService language)
     private readonly List<string> _statusMessages = [];
     private readonly List<string> _contextMessages = [];
     private readonly List<string> _dungeonRows = [];
-    private State? _currentState;
+    private State _currentState = null!;
     
     public void SetState(State state)
     {
@@ -60,65 +60,74 @@ public class ConsoleGameOutput(ILanguageService language)
     
     private void BuildDungeonRows()
     {
-        if (_currentState == null)
-        {
-            return;
-        }
-        
         // Build the top row of the dungeon
-        string topWall = 
-            Constants.WallCornerTopLeft +
-            new string(Constants.WallTop[0], Constants.DungeonWidth * 5 + 1) +
-            Constants.WallCornerTopRight;
-        
+        string topWall = BuildDungeonTopWall();
         _dungeonRows.Add(topWall);
 
         // Build the center of the dungeon
         for (int y = 0; y < Constants.DungeonHeight; y++)
         {
-            int rowValue = 0;
-            StringBuilder row = new();
-            row.Append($"{Constants.WallLeft} "); // Left wall
-
-            for (int x = 0; x < Constants.DungeonWidth; x++)
-            {
-                var monsterStrength = _currentState.Monsters[y][x];
-                var treasureValue = _currentState.Treasures[y][x];
-
-                if (_currentState.HeroX == x && _currentState.HeroY == y)
-                {
-                    row.Append($"{Constants.GetHeroEmoji(_currentState.HeroIsAlive)}   "); // Hero emoji with consistent spacing
-                }
-                else if (monsterStrength > 0)
-                {
-                    row.Append(Constants.GetMonsterEmoji(monsterStrength)); // Monster emoji
-                    row.Append($"{monsterStrength:D2} "); // Monster strength
-                    rowValue -= monsterStrength;
-                }
-                else if (treasureValue > 0)
-                {
-                    row.Append(Constants.GetTreasureEmoji(treasureValue)); // Treasure emoji
-                    row.Append($"{treasureValue:D2} "); // Treasure value
-                    rowValue += treasureValue;
-                }
-                else
-                {
-                    row.Append($"{Constants.EmptyCell}    ");
-                }
-            }
-
-            row.Append(Constants.WallRight); // Right wall
-            row.Append($" {rowValue:D3}"); // Row value
-            _dungeonRows.Add(row.ToString());
+            var middleRow = BuildDungeonMiddleRow(y);
+            _dungeonRows.Add(middleRow);
         }
 
         // Build the bottom row of the dungeon
-        string bottomWall = 
-            Constants.WallCornerBottomLeft +
-            new string(Constants.WallBottom[0], Constants.DungeonWidth * 5 + 1) +
-            Constants.WallCornerBottomRight;
-
+        string bottomWall = BuildDungeonBottomWall();
         _dungeonRows.Add(bottomWall);
+    }
+
+    private static string BuildDungeonTopWall()
+    {
+        return Constants.WallCornerTopLeft +
+               new string(Constants.WallTop[0], Constants.DungeonWidth * 5 + 1) +
+               Constants.WallCornerTopRight;
+    }
+
+    private string BuildDungeonMiddleRow(int rowIndex)
+    {
+        StringBuilder sb = new();
+        sb.Append($"{Constants.WallLeft} "); // Left wall
+
+        int rowValue = 0;
+        
+        for (int x = 0; x < Constants.DungeonWidth; x++)
+        {
+            var monsterStrength = _currentState.Monsters[rowIndex][x];
+            var treasureValue = _currentState.Treasures[rowIndex][x];
+
+            if (_currentState.HeroX == x && _currentState.HeroY == rowIndex)
+            {
+                sb.Append($"{Constants.GetHeroEmoji(_currentState.HeroIsAlive)}   "); // Hero emoji with consistent spacing
+            }
+            else if (monsterStrength > 0)
+            {
+                sb.Append(Constants.GetMonsterEmoji(monsterStrength)); // Monster emoji
+                sb.Append($"{monsterStrength:D2} "); // Monster strength
+                rowValue -= monsterStrength;
+            }
+            else if (treasureValue > 0)
+            {
+                sb.Append(Constants.GetTreasureEmoji(treasureValue)); // Treasure emoji
+                sb.Append($"{treasureValue:D2} "); // Treasure value
+                rowValue += treasureValue;
+            }
+            else
+            {
+                sb.Append($"{Constants.EmptyCell}    ");
+            }
+        }
+
+        sb.Append(Constants.WallRight); // Right wall
+        sb.Append($" {rowValue:D3}"); // Row value
+
+        return sb.ToString();
+    }
+    
+    private static string BuildDungeonBottomWall()
+    {
+        return Constants.WallCornerBottomLeft +
+               new string(Constants.WallBottom[0], Constants.DungeonWidth * 5 + 1) +
+               Constants.WallCornerBottomRight;
     }
 
     public void AddStatusMessage(LanguageKey key, params object[] args)

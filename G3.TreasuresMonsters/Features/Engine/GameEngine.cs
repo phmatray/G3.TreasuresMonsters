@@ -43,7 +43,7 @@ public class GameEngine(
         {
             if (_state.HeroIsDead)
             {
-                GameOver();
+                HandleGameOver();
             }
 
             _output.DisplayMessage(LanguageKey.MovePrompt);
@@ -56,23 +56,23 @@ public class GameEngine(
     {
         switch (inputKey)
         {
-            case ConsoleKey.UpArrow:
-                HandleMovementUp();
+            case Constants.MoveUpKey:
+                HandleMoveUp();
                 break;
-            case ConsoleKey.DownArrow:
-                HandleMovementDown();
+            case Constants.MoveDownKey:
+                HandleMoveDown();
                 break;
-            case ConsoleKey.LeftArrow:
-                HandleMovementLeft();
+            case Constants.MoveLeftKey:
+                HandleMoveLeft();
                 break;
-            case ConsoleKey.RightArrow:
-                HandleMovementRight();
+            case Constants.MoveRightKey:
+                HandleMoveRight();
                 break;
-            case ConsoleKey.Q:
-                QuitGame();
+            case Constants.ShowHintKey:
+                HandleShowHint();
                 break;
-            case ConsoleKey.H:
-                ShowHint();
+            case Constants.QuitGameKey:
+                HandleQuitGame();
                 break;
             default:
                 _output.AddStatusMessage(LanguageKey.InvalidInput);
@@ -80,13 +80,13 @@ public class GameEngine(
         }
     }
 
-    private void HandleMovementUp()
+    private void HandleMoveUp()
     {
         _output.AddContextMessage(LanguageKey.CannotMoveUp);
         _output.DisplayScreen();
     }
     
-    private void HandleMovementDown()
+    private void HandleMoveDown()
     {
         _state.MoveHeroDown();
             
@@ -102,7 +102,7 @@ public class GameEngine(
         }
     }
 
-    private void HandleMovementLeft()
+    private void HandleMoveLeft()
     {
         if (_state.HeroMoveConstraint == MovementConstraint.Left)
         {
@@ -123,7 +123,7 @@ public class GameEngine(
         }
     }
 
-    private void HandleMovementRight()
+    private void HandleMoveRight()
     {
         if (_state.HeroMoveConstraint == MovementConstraint.Right)
         {
@@ -177,21 +177,21 @@ public class GameEngine(
         }
     }
     
-    private void GameOver()
+    private void HandleGameOver()
     {
         _output.AddContextMessage(LanguageKey.GameOver);
         _output.DisplayScreen();
         Environment.Exit(0);
     }
     
-    private void QuitGame()
+    private void HandleQuitGame()
     {
         _output.AddContextMessage(LanguageKey.ThanksForPlaying);
         _output.DisplayScreen();
         Environment.Exit(0);
     }
 
-    private void ShowHint()
+    private void HandleShowHint()
     {
         if (_state.NbHint > 0)
         {

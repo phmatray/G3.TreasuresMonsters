@@ -26,7 +26,7 @@ public class LanguageService : ILanguageService
         {
             LanguageKey.Level => "--- Level {0} ---",
             LanguageKey.ScoreToBeat => "Score to beat: {0}",
-            LanguageKey.MovePrompt => "Move (←/↓/→), H for hint, Q to quit: ",
+            LanguageKey.MovePrompt => $"Move ({Constants.MoveLeft}/{Constants.MoveDown}/{Constants.MoveRight}), H for hint, Q to quit: ",
             LanguageKey.InvalidInput => "Invalid input.",
             LanguageKey.CannotMoveUp => "You cannot move up.",
             LanguageKey.CannotMoveLeft => "You cannot change direction to the left.",
@@ -44,7 +44,7 @@ public class LanguageService : ILanguageService
             LanguageKey.GameOver => "You are dead. Game over!",
             LanguageKey.ThanksForPlaying => "Thank you for playing!",
             LanguageKey.HeroStatus => "Health: {0} / 100 | Score: {1} | Hints: {2}",
-            LanguageKey.LevelEnd => "Press '↓' to move to the next level.",
+            LanguageKey.LevelEnd => $"Press '{Constants.MoveDown}' to move to the next level.",
             _ => key.ToString() // Return key name if not found
         };
     }
@@ -55,7 +55,7 @@ public class LanguageService : ILanguageService
         {
             LanguageKey.Level => "--- Niveau {0} ---",
             LanguageKey.ScoreToBeat => "Score à battre : {0}",
-            LanguageKey.MovePrompt => "Déplacez-vous (←/↓/→), H pour indice, Q pour quitter : ",
+            LanguageKey.MovePrompt => $"Déplacez-vous ({Constants.MoveLeft}/{Constants.MoveDown}/{Constants.MoveRight}), H pour indice, Q pour quitter : ",
             LanguageKey.InvalidInput => "Entrée invalide.",
             LanguageKey.CannotMoveUp => "Impossible de remonter.",
             LanguageKey.CannotMoveLeft => "Vous ne pouvez pas changer de direction vers la gauche.",
@@ -73,7 +73,7 @@ public class LanguageService : ILanguageService
             LanguageKey.GameOver => "Vous êtes mort. Fin du jeu !",
             LanguageKey.ThanksForPlaying => "Merci d'avoir joué !",
             LanguageKey.HeroStatus => "Vie : {0} / 100 | Score : {1} | Indices : {2}",
-            LanguageKey.LevelEnd => "Appuyez sur '↓' pour passer au niveau suivant.",
+            LanguageKey.LevelEnd => $"Appuyez sur '{Constants.MoveDown}' pour passer au niveau suivant.",
             _ => key.ToString() // Return key name if not found
         };
     }

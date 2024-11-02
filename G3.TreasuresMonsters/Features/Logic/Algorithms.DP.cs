@@ -12,6 +12,9 @@ public static partial class Algorithms
     /* --- Dynamic Programming --- */
     public static class DP
     {
+        private const int Height = Constants.DungeonHeight;
+        private const int Width = Constants.DungeonWidth;
+        
         // Signature de la méthode en Java :
         // String perfectSolution(State state)
         public static string PerfectSolution(State state)
@@ -22,11 +25,8 @@ public static partial class Algorithms
         }
 
         // Recursive method to search for the best path
-        private static MemoValue DP_Search(int x, int y, int health, State state, Dictionary<MemoKey, MemoValue> memo)
+        private static MemoValue? DP_Search(int x, int y, int health, State state, Dictionary<MemoKey, MemoValue> memo)
         {
-            int height = state.Monsters.Length;
-            int width = state.Monsters[0].Length;
-
             // Base cases
             if (health <= 0)
             {
@@ -34,7 +34,7 @@ public static partial class Algorithms
                 return null;
             }
 
-            if (y >= height)
+            if (y >= Height)
             {
                 // Reached the end of the dungeon successfully
                 return new MemoValue(health, 0, "");
@@ -42,25 +42,25 @@ public static partial class Algorithms
 
             var key = new MemoKey(x, y, health);
 
-            if (memo.TryGetValue(key, out MemoValue memoizedResult))
+            if (memo.TryGetValue(key, out MemoValue? memoizedResult))
             {
                 // Return the memoized result
                 return memoizedResult;
             }
 
-            MemoValue bestResult = null;
+            MemoValue? bestResult = null;
 
             // Possible moves: Down, Left, Right
-            int[] dx = { 0, -1, 1 };
-            int[] dy = { 1, 0, 0 };
-            char[] moveChar = { '↓', '←', '→' };
+            int[] dx = [0, -1, 1];
+            int[] dy = [1, 0, 0];
+            string[] moves = Constants.GetMoves();
 
             for (int i = 0; i < dx.Length; i++)
             {
                 int nx = x + dx[i];
                 int ny = y + dy[i];
 
-                if (IsInBounds(nx, ny, width, height))
+                if (IsInBounds(nx, ny))
                 {
                     int newHealth = health;
                     int treasureCollected = 0;
@@ -78,7 +78,7 @@ public static partial class Algorithms
 
                         if (bestResult == null || totalScore > bestResult.TotalScore)
                         {
-                            bestResult = new MemoValue(totalHealth, totalTreasure, moveChar[i] + result.Path);
+                            bestResult = new MemoValue(totalHealth, totalTreasure, moves[i] + result.Path);
                         }
                     }
                 }
@@ -91,17 +91,15 @@ public static partial class Algorithms
         }
 
         // Check if the next position is within bounds
-        private static bool IsInBounds(int x, int y, int width, int height)
+        private static bool IsInBounds(int x, int y)
         {
-            return x >= 0 && x < width && y >= 0;
+            return x >= 0 && x < Width && y >= 0;
         }
 
         // Apply the effects of the cell (monsters and treasures)
         private static void ApplyCellEffects(int x, int y, State state, ref int health, ref int treasureCollected)
         {
-            int height = state.Monsters.Length;
-
-            if (y < height)
+            if (y < Height)
             {
                 // Subtract monster strength from health
                 health -= state.Monsters[y][x];

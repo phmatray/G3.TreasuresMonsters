@@ -94,14 +94,7 @@ public class State
         if (value < 0)
             throw new ArgumentException("Value must be positive");
 
-        if (HeroHealth - value >= 0)
-        {
-            HeroHealth -= value;
-        }
-        else
-        {
-            HeroHealth = 0;
-        }
+        HeroHealth = Math.Max(0, HeroHealth - value);
     }
 
     public void IncreaseHeroScore(int value)
