@@ -23,7 +23,7 @@ public class GameEngine(
             [],
             [],
             1,
-            1
+            0
         );
     }
 
@@ -147,7 +147,6 @@ public class GameEngine(
                 break;
             case CellResolutionType.EndOfLevel:
                 EndLevel();
-                _state.IncreaseCurrentLevel();
                 StartNewLevel();
                 break;
             default:
@@ -159,20 +158,6 @@ public class GameEngine(
             _output.AddContextMessage(LanguageKey.LevelEnd);
             _output.DisplayScreen();
         }
-    }
-    
-    private void HandleGameOver()
-    {
-        _output.AddContextMessage(LanguageKey.GameOver);
-        _output.DisplayScreen();
-        Environment.Exit(0);
-    }
-    
-    private void HandleQuitGame()
-    {
-        _output.AddContextMessage(LanguageKey.ThanksForPlaying);
-        _output.DisplayScreen();
-        Environment.Exit(0);
     }
 
     private void HandleShowHint()
@@ -191,7 +176,21 @@ public class GameEngine(
 
         _output.DisplayScreen();
     }
-
+    
+    private void HandleQuitGame()
+    {
+        _output.AddContextMessage(LanguageKey.ThanksForPlaying);
+        _output.DisplayScreen();
+        Environment.Exit(0);
+    }
+    
+    private void HandleGameOver()
+    {
+        _output.AddContextMessage(LanguageKey.GameOver);
+        _output.DisplayScreen();
+        Environment.Exit(0);
+    }
+    
     private void EndLevel()
     {
         _output.AddContextMessage(LanguageKey.LevelCompleted);

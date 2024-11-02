@@ -245,6 +245,7 @@ public class State
     
     public void InitializeDungeon()
     {
+        IncreaseCurrentLevel();
         IncreaseHeroHealth(50);
         
         // Initialize the monsters and treasures
