@@ -20,7 +20,7 @@ public class ConsoleGameOutput(ILanguageService language)
         AddStatusMessage(LanguageKey.ScoreToBeat, state.DungeonScoreToBeat);
         AddStatusMessage(LanguageKey.HeroStatus, state.HeroHealth, state.HeroScore, state.NbHint);
 
-        BuildDungeonRows();
+        BuildDungeonRows(state);
     }
 
     public void DisplayScreen(bool clearContextMessages = true)
@@ -58,39 +58,39 @@ public class ConsoleGameOutput(ILanguageService language)
         }
     }
     
-    private void BuildDungeonRows()
+    private void BuildDungeonRows(State state)
     {
         // Build the top row of the dungeon
-        string topWall = BuildDungeonTopWall();
+        string topWall = BuildDungeonTopWall(state);
         _dungeonRows.Add(topWall);
 
         // Build the center of the dungeon
-        for (int y = 0; y < Constants.DungeonHeight; y++)
+        for (int y = 0; y < _currentState.DungeonHeight; y++)
         {
-            var middleRow = BuildDungeonMiddleRow(y);
+            var middleRow = BuildDungeonMiddleRow(state, y);
             _dungeonRows.Add(middleRow);
         }
 
         // Build the bottom row of the dungeon
-        string bottomWall = BuildDungeonBottomWall();
+        string bottomWall = BuildDungeonBottomWall(state);
         _dungeonRows.Add(bottomWall);
     }
 
-    private static string BuildDungeonTopWall()
+    private static string BuildDungeonTopWall(State state)
     {
         return Constants.WallCornerTopLeft +
-               new string(Constants.WallTop[0], Constants.DungeonWidth * 5 + 1) +
+               new string(Constants.WallTop[0], state.DungeonWidth * 5 + 1) +
                Constants.WallCornerTopRight;
     }
 
-    private string BuildDungeonMiddleRow(int rowIndex)
+    private string BuildDungeonMiddleRow(State state, int rowIndex)
     {
         StringBuilder sb = new();
         sb.Append($"{Constants.WallLeft} "); // Left wall
 
         int rowValue = 0;
         
-        for (int x = 0; x < Constants.DungeonWidth; x++)
+        for (int x = 0; x < state.DungeonWidth; x++)
         {
             var monsterStrength = _currentState.Monsters[rowIndex][x];
             var treasureValue = _currentState.Treasures[rowIndex][x];
@@ -123,10 +123,10 @@ public class ConsoleGameOutput(ILanguageService language)
         return sb.ToString();
     }
     
-    private static string BuildDungeonBottomWall()
+    private static string BuildDungeonBottomWall(State state)
     {
         return Constants.WallCornerBottomLeft +
-               new string(Constants.WallBottom[0], Constants.DungeonWidth * 5 + 1) +
+               new string(Constants.WallBottom[0], state.DungeonWidth * 5 + 1) +
                Constants.WallCornerBottomRight;
     }
 

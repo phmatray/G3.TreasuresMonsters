@@ -3,8 +3,8 @@ namespace G3.TreasuresMonsters;
 public static class Constants
 {
     public const int MaxHealth = 100;
-    public const int DungeonWidth = 7;
-    public const int DungeonHeight = 11;
+    public const int InitialDungeonWidth = 7;
+    public const int InitialDungeonHeight = 11;
 
     public const string HeroAlive = "🦄";
     public const string HeroDead = "💀";

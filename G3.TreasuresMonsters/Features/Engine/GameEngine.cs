@@ -90,7 +90,7 @@ public class GameEngine(
     {
         _state.MoveHeroDown();
             
-        if (_state.HeroY >= Constants.DungeonHeight)
+        if (_state.HeroY >= _state.DungeonHeight)
         {
             EndLevel();
             _state.IncreaseCurrentLevel();
@@ -131,7 +131,7 @@ public class GameEngine(
             _output.AddContextMessage(LanguageKey.CannotMoveRight);
             _output.DisplayScreen();
         }
-        else if (_state.HeroX + 1 >= Constants.DungeonWidth)
+        else if (_state.HeroX + 1 >= _state.DungeonWidth)
         {
             // check array bounds
             _output.AddContextMessage(LanguageKey.CannotMoveThere);
@@ -170,7 +170,7 @@ public class GameEngine(
             _output.DisplayScreen(false);
         }
         
-        if (_state.HeroY == Constants.DungeonHeight - 1)
+        if (_state.HeroY == _state.DungeonHeight - 1)
         {
             _output.AddContextMessage(LanguageKey.LevelEnd);
             _output.DisplayScreen();

@@ -65,6 +65,69 @@ public class State
     public int HeroY => HeroPos[1];
     public bool HeroIsAlive => HeroHealth > 0;
     public bool HeroIsDead => HeroHealth <= 0;
+    public int DungeonHeight => Monsters.Length;
+    public int DungeonWidth => Monsters[0].Length;
+    
+    public State Copy()
+    {
+        int[] heroPos = [HeroPos[0], HeroPos[1]];
+        var monsters = CopyArray(Monsters);
+        var treasures = CopyArray(Treasures);
+        
+        return new State(
+            heroPos,
+            HeroHealth,
+            HeroScore,
+            monsters,
+            treasures,
+            NbHint,
+            NbLevel
+        );
+    }
+    
+    public int[][] CopyArray(int[][] array)
+    {
+        var copy = new int[array.Length][];
+        
+        for (int i = 0; i < array.Length; i++)
+        {
+            copy[i] = new int[array[i].Length];
+        }
+        
+        for (int y = 0; y < array.Length; y++)
+        {
+            for (int x = 0; x < array[y].Length; x++)
+            {
+                copy[y][x] = array[y][x];
+            }
+        }
+        
+        return copy;
+    }
+    
+    public void ApplyMove(string move)
+    {
+        switch (move)
+        {
+            case Constants.MoveDown:
+                MoveHeroDown();
+                break;
+            case Constants.MoveLeft:
+                MoveHeroLeft();
+                break;
+            case Constants.MoveRight:
+                MoveHeroRight();
+                break;
+            default:
+                throw new ArgumentException("Invalid move");
+        }
+    }
+    
+    public void MoveHeroDown()
+    {
+        HeroPos[1]++;
+        HeroMoveConstraint = MovementConstraint.None;
+    }
     
     public void MoveHeroLeft()
     {
@@ -76,12 +139,6 @@ public class State
     {
         HeroPos[0]++;
         HeroMoveConstraint = MovementConstraint.Left;
-    }
-    
-    public void MoveHeroDown()
-    {
-        HeroPos[1]++;
-        HeroMoveConstraint = MovementConstraint.None;
     }
 
     public void IncreaseHeroHealth(int value)
@@ -126,26 +183,27 @@ public class State
     public void InitializeDungeon()
     {
         IncreaseHeroHealth(50);
-        Monsters = new int[Constants.DungeonHeight][];
-        Treasures = new int[Constants.DungeonHeight][];
         
         // Initialize the monsters and treasures
-        for (int i = 0; i < Constants.DungeonHeight; i++)
+        Monsters = new int[Constants.InitialDungeonHeight][];
+        Treasures = new int[Constants.InitialDungeonHeight][];
+        
+        for (int i = 0; i < Constants.InitialDungeonHeight; i++)
         {
-            Monsters[i] = new int[Constants.DungeonWidth];
-            Treasures[i] = new int[Constants.DungeonWidth];
+            Monsters[i] = new int[Constants.InitialDungeonWidth];
+            Treasures[i] = new int[Constants.InitialDungeonWidth];
         }
 
         Algorithms.GT.GenerateMonstersAndTreasures(Monsters, Treasures);
         Algorithms.DC.SortLevel(Monsters, Treasures); // Trier le niveau après la génération
         
         // Initialize the hero's position
-        HeroPos = [Constants.DungeonWidth / 2, 0];
+        HeroPos = [DungeonWidth / 2, 0];
 
         // If the hero is on a monster or a treasure, move the obstacle to the first free cell on the top row
         if (Monsters[HeroY][HeroX] > 0 || Treasures[HeroY][HeroX] > 0)
         {
-            for (int x = 0; x < Constants.DungeonWidth; x++)
+            for (int x = 0; x < DungeonWidth; x++)
             {
                 if (Monsters[0][x] != 0 || Treasures[0][x] != 0)
                 {
