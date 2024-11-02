@@ -110,35 +110,98 @@ public class State
         switch (move)
         {
             case Constants.MoveDown:
-                MoveHeroDown();
+                MoveDown();
                 break;
             case Constants.MoveLeft:
-                MoveHeroLeft();
+                MoveLeft();
                 break;
             case Constants.MoveRight:
-                MoveHeroRight();
+                MoveRight();
                 break;
             default:
                 throw new ArgumentException("Invalid move");
         }
     }
     
-    public void MoveHeroDown()
+    public bool CanMoveLeft()
+    {
+        if (HeroMoveConstraint == MovementConstraint.Left)
+        {
+            return false;
+        }
+        
+        return HeroX - 1 >= 0;
+    }
+    
+    public bool CanMoveRight()
+    {
+        if (HeroMoveConstraint == MovementConstraint.Right)
+        {
+            return false;
+        }
+        
+        return HeroX + 1 < DungeonWidth;
+    }
+    
+    public CellResolution MoveDown()
     {
         HeroPos[1]++;
         HeroMoveConstraint = MovementConstraint.None;
+
+        if (HeroY >= DungeonHeight)
+        {
+            // End of the level
+            return new CellResolution(CellResolutionType.EndOfLevel, 0);
+        }
+
+        return ResolveCell();
     }
     
-    public void MoveHeroLeft()
+    public CellResolution MoveLeft()
     {
+        if (!CanMoveLeft())
+            throw new InvalidOperationException("Cannot move left");
+        
         HeroPos[0]--;
         HeroMoveConstraint = MovementConstraint.Right;
+        return ResolveCell();
     }
     
-    public void MoveHeroRight()
+    public CellResolution MoveRight()
     {
+        if (!CanMoveRight())
+            throw new InvalidOperationException("Cannot move right");
+        
         HeroPos[0]++;
         HeroMoveConstraint = MovementConstraint.Left;
+        return ResolveCell();
+    }
+    
+    public CellResolution ResolveCell()
+    {
+        // Ensure the hero's position is within bounds
+        if (HeroY < 0 || HeroY >= DungeonHeight || HeroX < 0 || HeroX >= DungeonWidth)
+            throw new InvalidOperationException("Hero is out of dungeon bounds");
+        
+        // Check for monster
+        var monsterStrength = Monsters[HeroY][HeroX];
+        if (monsterStrength > 0)
+        {
+            DecreaseHeroHealth(monsterStrength);
+            Monsters[HeroY][HeroX] = 0;
+            return new CellResolution(CellResolutionType.Monster, monsterStrength);
+        }
+
+        // Check for treasure
+        var treasureValue = Treasures[HeroY][HeroX];
+        if (treasureValue > 0)
+        {
+            IncreaseHeroScore(treasureValue);
+            Treasures[HeroY][HeroX] = 0;
+            return new CellResolution(CellResolutionType.Treasure, treasureValue);
+        }
+
+        return new CellResolution(CellResolutionType.Empty, 0);
     }
 
     public void IncreaseHeroHealth(int value)

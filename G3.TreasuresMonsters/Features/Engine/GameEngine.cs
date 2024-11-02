@@ -88,86 +88,70 @@ public class GameEngine(
     
     private void HandleMoveDown()
     {
-        _state.MoveHeroDown();
-            
-        if (_state.HeroY >= _state.DungeonHeight)
-        {
-            EndLevel();
-            _state.IncreaseCurrentLevel();
-            StartNewLevel();
-        }
-        else
-        {
-            ResolveCell();
-        }
+        var cellResolution = _state.MoveDown();
+        ProcessCellResolution(cellResolution);
     }
 
     private void HandleMoveLeft()
     {
-        if (_state.HeroMoveConstraint == MovementConstraint.Left)
+        if (_state.CanMoveLeft())
         {
-            // check if the hero can move left
-            _output.AddContextMessage(LanguageKey.CannotMoveLeft);
-            _output.DisplayScreen();
-        }
-        else if (_state.HeroX - 1 < 0)
-        {
-            // check array bounds
-            _output.AddContextMessage(LanguageKey.CannotMoveThere);
-            _output.DisplayScreen();
+            var cellResolution = _state.MoveLeft();
+            ProcessCellResolution(cellResolution);
         }
         else
         {
-            _state.MoveHeroLeft();
-            ResolveCell();
+            var cannotMoveKey = _state.HeroMoveConstraint == MovementConstraint.Left
+                ? LanguageKey.CannotMoveLeft
+                : LanguageKey.CannotMoveThere;
+            
+            _output.AddContextMessage(cannotMoveKey);
+            _output.DisplayScreen();
         }
     }
 
     private void HandleMoveRight()
     {
-        if (_state.HeroMoveConstraint == MovementConstraint.Right)
+        if (_state.CanMoveRight())
         {
-            // check if the hero can move right
-            _output.AddContextMessage(LanguageKey.CannotMoveRight);
-            _output.DisplayScreen();
-        }
-        else if (_state.HeroX + 1 >= _state.DungeonWidth)
-        {
-            // check array bounds
-            _output.AddContextMessage(LanguageKey.CannotMoveThere);
-            _output.DisplayScreen();
+            var cellResolution = _state.MoveRight();
+            ProcessCellResolution(cellResolution);
         }
         else
         {
-            _state.MoveHeroRight();
-            ResolveCell();
+            var cannotMoveKey = _state.HeroMoveConstraint == MovementConstraint.Right
+                ? LanguageKey.CannotMoveRight
+                : LanguageKey.CannotMoveThere;
+            
+            _output.AddContextMessage(cannotMoveKey);
+            _output.DisplayScreen();
         }
     }
 
-    private void ResolveCell()
+    private void ProcessCellResolution(CellResolution cellResolution)
     {
-        if (_state.Monsters[_state.HeroY][_state.HeroX] > 0)
+        _output.SetState(_state);
+
+        switch (cellResolution.Type)
         {
-            int monsterStrength = _state.Monsters[_state.HeroY][_state.HeroX];
-            _state.DecreaseHeroHealth(monsterStrength);
-            _state.Monsters[_state.HeroY][_state.HeroX] = 0;
-            _output.SetState(_state);
-            _output.AddContextMessage(LanguageKey.MonsterEncounter, monsterStrength);
-            _output.DisplayScreen();
-        }
-        else if (_state.Treasures[_state.HeroY][_state.HeroX] > 0)
-        {
-            int treasureValue = _state.Treasures[_state.HeroY][_state.HeroX];
-            _state.IncreaseHeroScore(treasureValue);
-            _state.Treasures[_state.HeroY][_state.HeroX] = 0;
-            _output.SetState(_state);
-            _output.AddContextMessage(LanguageKey.TreasureFound, treasureValue);
-            _output.DisplayScreen();
-        }
-        else
-        {
-            _output.SetState(_state);
-            _output.DisplayScreen(false);
+            case CellResolutionType.Empty:
+                _output.DisplayScreen(false);
+                break;
+            case CellResolutionType.Monster:
+                _output.AddContextMessage(LanguageKey.MonsterEncounter, cellResolution.Value);
+                _output.DisplayScreen();
+                break;
+            case CellResolutionType.Treasure:
+                _output.AddContextMessage(LanguageKey.TreasureFound, cellResolution.Value);
+                _output.DisplayScreen();
+                break;
+            case CellResolutionType.EndOfLevel:
+                EndLevel();
+                _state.IncreaseCurrentLevel();
+                StartNewLevel();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
         
         if (_state.HeroY == _state.DungeonHeight - 1)
