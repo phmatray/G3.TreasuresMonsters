@@ -38,7 +38,9 @@ public static class Constants
     public const ConsoleKey QuitGameKey = ConsoleKey.Q;
     
     public static string GetHeroEmoji(bool isAlive)
-        => isAlive ? HeroAlive : HeroDead;
+        => isAlive
+            ? HeroAlive
+            : HeroDead;
     
     public static string GetMonsterEmoji(int strength)
         => strength switch
@@ -54,7 +56,12 @@ public static class Constants
             >= 80 => TreasureB,
             _ => TreasureA
         };
-    
+
     public static string[] GetMoves()
-        => [MoveDown, MoveLeft, MoveRight];
+        =>
+        [
+            MoveDown,
+            MoveLeft,
+            MoveRight
+        ];
 }
