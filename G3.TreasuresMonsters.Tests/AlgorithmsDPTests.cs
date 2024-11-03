@@ -411,9 +411,7 @@ public class AlgorithmsDPTests
         Assert.That(possiblePaths, Does.Contain(path), "Hero should take any path with maximum total score.");
     }
     
-    // WRONG Perfect path: ↓↓↓↓↓↓→↓→↓←←←↓←←↓↓
-    // EXPECTED path     : ↓↓→→↓↓↓↓↓←↓←←←↓←↓↓
-    //
+    // EXPECTED path     : ↓↓→↓↓↓↓→↓←↓←←←↓←↓↓
     // ╔════════════════════════════════════╗
     // ║ 🧟34 👾06 👺48 🦄   .    👺44 .    ║ -132
     // ║ .    .    👺43 .    🧟38 .    🧟15 ║ -096
@@ -455,7 +453,7 @@ public class AlgorithmsDPTests
             [ 0,  0,  0,  0,  0,  0,  0],
             [ 0,  0,  0,  0,  0,  0,  0],
             [ 0,  0,  0,  0,  0,  0,  0],
-            [ 0,  0,  0,  0, 62,  0,  0],
+            [ 0,  0,  0,  0,  0, 62,  0],
             [ 0,  0,  0,  0,  0,  0,  0],
             [91,  0,  0,  0,  0,  0,  0],
             [36,  0,  0,  0,  0,  0,  0]
@@ -475,6 +473,6 @@ public class AlgorithmsDPTests
         string path = Algorithms.DP.PerfectSolution(state);
         
         // Assert
-        Assert.That(path, Is.EqualTo("↓↓→→↓↓↓↓↓←↓←←←↓←↓↓"), "The path should collect the maximum treasure while avoiding monsters.");
+        Assert.That(path, Is.EqualTo("↓↓→↓↓↓↓→↓←↓←←←↓←↓↓"), "The path should collect the maximum treasure while avoiding monsters.");
     }
 }

@@ -25,6 +25,9 @@ public static partial class Algorithms
 
         public override int GetHashCode() => 
             HashCode.Combine(HeroX, HeroY, MoveConstraint, HeroHealth);
+
+        public override string ToString() =>
+            $"({HeroX}, {HeroY}, {MoveConstraint}, {HeroHealth}, {HeroScore})";
     }
 
     /* --- Dynamic Programming --- */
@@ -48,13 +51,13 @@ public static partial class Algorithms
                 initialState.HeroY,
                 MovementConstraint.None,
                 initialState.HeroHealth,
-                initialState.HeroScore
+                0
             );
 
             dp[startState] = (initialState.HeroScore, null, null);
             queue.Enqueue(startState);
 
-            int maxTotalScore = int.MinValue;
+            int maxTotalScore = 0;
             DPState? bestEndState = null;
 
             while (queue.Count > 0)
@@ -65,9 +68,9 @@ public static partial class Algorithms
                 if (currentState.HeroY >= initialState.DungeonHeight)
                 {
                     // Update the best end state if necessary
-                    if (currentState.HeroScore > maxTotalScore)
+                    if (currentState.HeroScore + currentState.HeroHealth > maxTotalScore)
                     {
-                        maxTotalScore = currentState.HeroScore;
+                        maxTotalScore = currentState.HeroScore + currentState.HeroHealth;
                         bestEndState = currentState;
                     }
 
