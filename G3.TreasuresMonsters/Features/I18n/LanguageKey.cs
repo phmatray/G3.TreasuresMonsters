@@ -22,5 +22,7 @@ public enum LanguageKey
     GameOver,
     ThanksForPlaying,
     HeroStatus,
-    LevelEnd
+    LevelEnd,
+    HeroIsDead,
+    NoValidPath
 }

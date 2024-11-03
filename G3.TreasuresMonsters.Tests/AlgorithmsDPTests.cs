@@ -184,7 +184,7 @@ public class AlgorithmsDPTests
         string path = Algorithms.DP.PerfectSolution(state);
 
         // Assert
-        Assert.That(path, Is.EqualTo("There is no valid path."), "There should be no valid path.");
+        Assert.That(path, Is.EqualTo("<INVALID>"), "There should be no valid path.");
     }
 
     [Test]
@@ -294,7 +294,7 @@ public class AlgorithmsDPTests
         string path = Algorithms.DP.PerfectSolution(state);
 
         // Assert
-        Assert.That(path, Is.EqualTo("The hero is already dead."), "There should be no valid path when hero health is negative.");
+        Assert.That(path, Is.EqualTo("<DEAD>"), "There should be no valid path when hero health is negative.");
     }
 
     [Test]

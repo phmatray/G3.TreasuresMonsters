@@ -45,6 +45,8 @@ public class LanguageService : ILanguageService
             LanguageKey.ThanksForPlaying => "Thank you for playing!",
             LanguageKey.HeroStatus => "Health: {0} / 100 | Score: {1} | Hints: {2}",
             LanguageKey.LevelEnd => $"Press '{Constants.MoveDown}' to move to the next level.",
+            LanguageKey.HeroIsDead => "The hero is already dead.",
+            LanguageKey.NoValidPath => "There is no valid path.",
             _ => key.ToString() // Return key name if not found
         };
     }
@@ -74,6 +76,8 @@ public class LanguageService : ILanguageService
             LanguageKey.ThanksForPlaying => "Merci d'avoir joué !",
             LanguageKey.HeroStatus => "Vie : {0} / 100 | Score : {1} | Indices : {2}",
             LanguageKey.LevelEnd => $"Appuyez sur '{Constants.MoveDown}' pour passer au niveau suivant.",
+            LanguageKey.HeroIsDead => "Le héros est déjà mort.",
+            LanguageKey.NoValidPath => "Il n'y a pas de chemin valide.",
             _ => key.ToString() // Return key name if not found
         };
     }

@@ -165,8 +165,28 @@ public class GameEngine(
         if (_state.NbHint > 0)
         {
             _state.DecreaseHint();
+            
             var path = Algorithms.DP.PerfectSolution(_state);
-            _output.AddStatusMessage(LanguageKey.PerfectPath, path);
+            
+            switch (path)
+            {
+                // path <DEAD> means the hero is dead
+                case "<DEAD>":
+                    _output.AddStatusMessage(LanguageKey.HeroIsDead);
+                    break;
+                // path <INVALID> means the hero cannot reach the end of the dungeon
+                case "<INVALID>":
+                    _output.AddStatusMessage(LanguageKey.NoValidPath);
+                    break;
+                // path is a valid path. Simplify it and display it
+                default:
+                {
+                    var simplifiedPath = new HeroPath(path).NormalizedPath;
+                    _output.AddStatusMessage(LanguageKey.PerfectPath, simplifiedPath);
+                    break;
+                }
+            }
+
             _output.AddContextMessage(LanguageKey.HintUsed);
         }
         else
@@ -175,8 +195,52 @@ public class GameEngine(
         }
 
         _output.DisplayScreen();
-    }
+    } 
     
+    private static string SimplifyPath(string path)
+    {
+        // A path like
+        // "↓←↓↓←↓←↓↓↓→→↓→→→↓→↓←↓";
+        // should be simplified to
+        // "↓ ← 2↓ ← ↓ ← 3↓ 2→ ↓ 3→ ↓ → ↓ ← ↓";
+        
+        if (string.IsNullOrEmpty(path))
+        {
+            return string.Empty;
+        }
+
+        StringBuilder simplifiedPath = new StringBuilder();
+        int count = 1;
+
+        for (int i = 1; i < path.Length; i++)
+        {
+            if (path[i] == path[i - 1])
+            {
+                count++;
+            }
+            else
+            {
+                simplifiedPath.Append(path[i - 1]);
+                if (count > 1)
+                {
+                    simplifiedPath.Append(count);
+                }
+
+                simplifiedPath.Append(' ');
+                count = 1;
+            }
+        }
+
+        // Append the last character and its count
+        simplifiedPath.Append(path[^1]);
+        if (count > 1)
+        {
+            simplifiedPath.Append(count);
+        }
+
+        return simplifiedPath.ToString().Trim();
+    }
+
     private void HandleQuitGame()
     {
         _output.AddContextMessage(LanguageKey.ThanksForPlaying);

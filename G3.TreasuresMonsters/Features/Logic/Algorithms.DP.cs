@@ -1,34 +1,28 @@
 namespace G3.TreasuresMonsters.Features.Logic;
 
+public record DPState(
+    int HeroX,
+    int HeroY,
+    MovementConstraint MoveConstraint,
+    int HeroHealth,
+    int HeroScore);
+
+public record DPRecord(
+    int TotalScore,
+    DPState? Predecessor,
+    string? Move);
+
+public record DPNewPositionResult(
+    int NewX,
+    int NewY,
+    MovementConstraint NewMoveConstraint);
+
+public record DPUpdatedStateResult(
+    int NewHealth,
+    int NewScore);
+
 public static partial class Algorithms
 {
-    public class DPState(
-        int heroX,
-        int heroY,
-        MovementConstraint moveConstraint,
-        int heroHealth,
-        int heroScore)
-    {
-        public int HeroX { get; } = heroX;
-        public int HeroY { get; } = heroY;
-        public MovementConstraint MoveConstraint { get; } = moveConstraint;
-        public int HeroHealth { get; } = heroHealth;
-        public int HeroScore { get; } = heroScore;
-
-        // Override Equals and GetHashCode for correct dictionary behavior
-        public override bool Equals(object? obj) =>
-            obj is DPState other &&
-            HeroX == other.HeroX &&
-            HeroY == other.HeroY &&
-            MoveConstraint == other.MoveConstraint &&
-            HeroHealth == other.HeroHealth;
-
-        public override int GetHashCode() => 
-            HashCode.Combine(HeroX, HeroY, MoveConstraint, HeroHealth);
-
-        public override string ToString() =>
-            $"({HeroX}, {HeroY}, {MoveConstraint}, {HeroHealth}, {HeroScore})";
-    }
 
     /* --- Dynamic Programming --- */
     public static class DP
@@ -38,14 +32,26 @@ public static partial class Algorithms
         // https://algodaily.com/lessons/memoization-in-dynamic-programming/csharp
         public static string PerfectSolution(State initialState)
         {
-            // Check if the hero is dead
             if (initialState.HeroHealth <= 0)
-                return "The hero is already dead.";
-            
-            var dp = new Dictionary<DPState, (int totalScore, DPState? predecessor, string? move)>();
+                return "<DEAD>";
+
+            var dp = new Dictionary<DPState, DPRecord>();
             var queue = new Queue<DPState>();
 
-            // Initialize starting state
+            InitializeStartState(initialState, dp, queue);
+
+            var result = ProcessQueue(initialState, dp, queue);
+
+            return result == null
+                ? "<INVALID>"
+                : ReconstructPath(dp, result);
+        }
+
+        private static void InitializeStartState(
+            State initialState,
+            Dictionary<DPState, DPRecord> dp,
+            Queue<DPState> queue)
+        {
             var startState = new DPState(
                 initialState.HeroX,
                 initialState.HeroY,
@@ -54,126 +60,122 @@ public static partial class Algorithms
                 0
             );
 
-            dp[startState] = (initialState.HeroScore, null, null);
+            dp[startState] = new DPRecord(initialState.HeroScore, null, null);
             queue.Enqueue(startState);
+        }
 
-            int maxTotalScore = 0;
+        private static DPState? ProcessQueue(
+            State initialState,
+            Dictionary<DPState, DPRecord> dp,
+            Queue<DPState> queue)
+        {
+            int highestScoreAchieved = 0;
             DPState? bestEndState = null;
 
             while (queue.Count > 0)
             {
                 var currentState = queue.Dequeue();
 
-                // Check if the hero has exited the dungeon
                 if (currentState.HeroY >= initialState.DungeonHeight)
                 {
-                    // Update the best end state if necessary
-                    if (currentState.HeroScore + currentState.HeroHealth > maxTotalScore)
+                    int currentTotalScore = currentState.HeroScore + currentState.HeroHealth;
+                    if (currentTotalScore > highestScoreAchieved)
                     {
-                        maxTotalScore = currentState.HeroScore + currentState.HeroHealth;
+                        highestScoreAchieved = currentTotalScore;
                         bestEndState = currentState;
                     }
-
                     continue;
                 }
 
-                // Generate possible moves
-                foreach (var move in Constants.GetMoves()) // ["↓", "←", "→"]
+                GenerateAndProcessMoves(initialState, currentState, dp, queue);
+            }
+
+            return bestEndState;
+        }
+
+        private static void GenerateAndProcessMoves(
+            State initialState,
+            DPState currentState,
+            Dictionary<DPState, DPRecord> dp,
+            Queue<DPState> queue)
+        {
+            foreach (var move in Constants.GetMoves())
+            {
+                if (!IsValidMove(currentState.MoveConstraint, move))
+                    continue;
+
+                var (newX, newY, newMoveConstraint) = GetNewPositionAndConstraint(currentState, move);
+
+                if (newX < 0 || newX >= initialState.DungeonWidth)
+                    continue;
+
+                var (newHealth, newScore) = GetUpdatedState(initialState, currentState, newX, newY);
+
+                if (newHealth <= 0)
+                    continue;
+
+                var newState = new DPState(newX, newY, newMoveConstraint, newHealth, newScore);
+
+                bool isBetterScore =
+                    !dp.TryGetValue(newState, out var existingState) ||
+                    newScore > existingState.TotalScore;
+                
+                if (isBetterScore)
                 {
-                    // Check movement constraints
-                    if (move == Constants.MoveLeft && currentState.MoveConstraint == MovementConstraint.Left)
-                        continue; // Cannot move left due to constraint
-                    if (move == Constants.MoveRight && currentState.MoveConstraint == MovementConstraint.Right)
-                        continue; // Cannot move right due to constraint
-
-                    // Determine new position and movement constraint
-                    int newX = currentState.HeroX;
-                    int newY = currentState.HeroY;
-                    MovementConstraint newMoveConstraint = currentState.MoveConstraint;
-
-                    switch (move)
-                    {
-                        case Constants.MoveDown:
-                            newY += 1;
-                            newMoveConstraint = MovementConstraint.None;
-                            break;
-                        case Constants.MoveLeft:
-                            newX -= 1;
-                            newMoveConstraint = MovementConstraint.Right;
-                            break;
-                        case Constants.MoveRight:
-                            newX += 1;
-                            newMoveConstraint = MovementConstraint.Left;
-                            break;
-                    }
-
-                    // Check if new position is within bounds
-                    if (newX < 0 || newX >= initialState.DungeonWidth)
-                        continue;
-
-                    // Get new health and score
-                    int newHealth = currentState.HeroHealth;
-                    int newScore = currentState.HeroScore;
-
-                    // Copy the monsters and treasures arrays
-                    var newMonsters = initialState.CopyArray(initialState.Monsters);
-                    var newTreasures = initialState.CopyArray(initialState.Treasures);
-
-                    // Check for out-of-bounds (after moving down from the bottom row)
-                    if (newY < initialState.DungeonHeight)
-                    {
-                        // Resolve cell
-                        int cellMonster = newMonsters[newY][newX];
-                        int cellTreasure = newTreasures[newY][newX];
-
-                        if (cellMonster > 0)
-                        {
-                            newHealth -= cellMonster;
-                            newMonsters[newY][newX] = 0;
-                        }
-
-                        if (cellTreasure > 0)
-                        {
-                            newScore += cellTreasure;
-                            newTreasures[newY][newX] = 0;
-                        }
-
-                        if (newHealth <= 0)
-                            continue; // Hero dies, skip this path
-                    }
-
-                    // Create new state
-                    var newState = new DPState(newX, newY, newMoveConstraint, newHealth, newScore);
-
-                    // Check if this state is better than any previously recorded state at this position with the same movement constraint
-                    if (dp.TryGetValue(newState, out var existingState))
-                    {
-                        if (newScore <= existingState.totalScore)
-                            continue; // Existing state is better or equal
-                    }
-
-                    // Update DP table
-                    dp[newState] = (newScore, currentState, move);
+                    dp[newState] = new DPRecord(newScore, currentState, move);
                     queue.Enqueue(newState);
                 }
             }
+        }
 
-            // If no valid path found
-            if (bestEndState == null)
-                return "There is no valid path.";
+        private static bool IsValidMove(MovementConstraint moveConstraint, string move)
+        {
+            return !(move == Constants.MoveLeft && moveConstraint == MovementConstraint.Left) &&
+                   !(move == Constants.MoveRight && moveConstraint == MovementConstraint.Right);
+        }
 
-            // Reconstruct the path from the best end state
-            var pathMoves = new Stack<string>();
-            var state = bestEndState;
+        private static DPNewPositionResult GetNewPositionAndConstraint(DPState currentState, string move)
+        {
+            var (newX, newY) = (currentState.HeroX, currentState.HeroY);
+            var newMoveConstraint = currentState.MoveConstraint;
 
-            while (dp[state].predecessor != null)
+            switch (move)
             {
-                var move = dp[state].move;
-                pathMoves.Push(move);
-                state = dp[state].predecessor;
+                case Constants.MoveDown:
+                    newY++;
+                    newMoveConstraint = MovementConstraint.None;
+                    break;
+                case Constants.MoveLeft:
+                    newX--;
+                    newMoveConstraint = MovementConstraint.Right;
+                    break;
+                case Constants.MoveRight:
+                    newX++;
+                    newMoveConstraint = MovementConstraint.Left;
+                    break;
             }
 
-            return string.Join("", pathMoves);
+            return new DPNewPositionResult(newX, newY, newMoveConstraint);
+        }
+
+        private static DPUpdatedStateResult GetUpdatedState(State initialState, DPState currentState, int newX, int newY)
+        {
+            if (newY >= initialState.DungeonHeight)
+            {
+                return new DPUpdatedStateResult(currentState.HeroHealth, currentState.HeroScore);
+            }
+
+            int newHealth = currentState.HeroHealth - Math.Max(0, initialState.Monsters[newY][newX]);
+            int newScore = currentState.HeroScore + Math.Max(0, initialState.Treasures[newY][newX]);
+
+            return new DPUpdatedStateResult(newHealth, newScore);
+        }
+
+        private static string ReconstructPath(Dictionary<DPState, DPRecord> dp, DPState bestEndState)
+        {
+            return dp[bestEndState].Predecessor != null
+                ? ReconstructPath(dp, dp[bestEndState].Predecessor) + dp[bestEndState].Move
+                : string.Empty;
         }
     }
 }
