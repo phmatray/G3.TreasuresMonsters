@@ -1,126 +1,176 @@
 namespace G3.TreasuresMonsters.Features.Logic;
 
-public record MemoKey(int X, int Y, int Health);
-
-public record MemoValue(int Health, int TreasureCollected, string Path)
-{
-    public int TotalScore => Health + TreasureCollected;
-}
-
 public static partial class Algorithms
 {
+    public class DPState(
+        int heroX,
+        int heroY,
+        MovementConstraint moveConstraint,
+        int heroHealth,
+        int heroScore)
+    {
+        public int HeroX { get; } = heroX;
+        public int HeroY { get; } = heroY;
+        public MovementConstraint MoveConstraint { get; } = moveConstraint;
+        public int HeroHealth { get; } = heroHealth;
+        public int HeroScore { get; } = heroScore;
+
+        // Override Equals and GetHashCode for correct dictionary behavior
+        public override bool Equals(object? obj) =>
+            obj is DPState other &&
+            HeroX == other.HeroX &&
+            HeroY == other.HeroY &&
+            MoveConstraint == other.MoveConstraint &&
+            HeroHealth == other.HeroHealth;
+
+        public override int GetHashCode() => 
+            HashCode.Combine(HeroX, HeroY, MoveConstraint, HeroHealth);
+    }
+
     /* --- Dynamic Programming --- */
     public static class DP
     {
         // Signature de la méthode en Java :
         // String perfectSolution(State state)
-        // Method to find the perfect solution using bottom-up DP
-        public static string PerfectSolution(State state)
+        // https://algodaily.com/lessons/memoization-in-dynamic-programming/csharp
+        public static string PerfectSolution(State initialState)
         {
-            // Initialize DP table
-            var heroHealth = state.HeroHealth;
-            var height = state.Monsters.Length;
-            var width = state.Monsters[0].Length;
-            var cache = new MemoValue?[height + 1, width, heroHealth + 1];
-            var moves = Constants.GetMoves(); // Should return ["↓", "←", "→"]
+            // Check if the hero is dead
+            if (initialState.HeroHealth <= 0)
+                return "The hero is already dead.";
+            
+            var dp = new Dictionary<DPState, (int totalScore, DPState? predecessor, string? move)>();
+            var queue = new Queue<DPState>();
 
-            // Base case: At the end of the dungeon, starting from any x with health > 0
-            for (int x = 0; x < width; x++)
-            {
-                for (int h = 1; h <= heroHealth; h++)
-                {
-                    cache[height, x, h] = new MemoValue(h, 0, "");
-                }
-            }
+            // Initialize starting state
+            var startState = new DPState(
+                initialState.HeroX,
+                initialState.HeroY,
+                MovementConstraint.None,
+                initialState.HeroHealth,
+                initialState.HeroScore
+            );
 
-            // Build the DP table from bottom to top
-            for (int y = height - 1; y >= 0; y--)
+            dp[startState] = (initialState.HeroScore, null, null);
+            queue.Enqueue(startState);
+
+            int maxTotalScore = int.MinValue;
+            DPState? bestEndState = null;
+
+            while (queue.Count > 0)
             {
-                for (int x = 0; x < width; x++)
+                var currentState = queue.Dequeue();
+
+                // Check if the hero has exited the dungeon
+                if (currentState.HeroY >= initialState.DungeonHeight)
                 {
-                    for (int health = 1; health <= heroHealth; health++)
+                    // Update the best end state if necessary
+                    if (currentState.HeroScore > maxTotalScore)
                     {
-                        MemoValue? bestResult = null;
-
-                        // Possible moves: Down, Left, Right
-                        int[] dx = [0, -1, 1];
-                        int[] dy = [1, 0, 0];
-                        string[] moveSymbols = moves;
-
-                        for (int i = 0; i < dx.Length; i++)
-                        {
-                            int nx = x + dx[i];
-                            int ny = y + dy[i];
-
-                            if (nx >= 0 && nx < width && ny >= 0 && ny < height)
-                            {
-                                int newHealth = health;
-                                int treasureCollected = 0;
-
-                                // Apply the effects of moving to the next cell
-                                ApplyCellEffects(nx, ny, state, ref newHealth, ref treasureCollected);
-
-                                // If health drops to zero or below, skip this path
-                                if (newHealth <= 0)
-                                    continue;
-
-                                var nextResult = cache[ny, nx, newHealth];
-
-                                if (nextResult != null)
-                                {
-                                    int totalTreasure = nextResult.TreasureCollected + treasureCollected;
-                                    int totalScore = newHealth + totalTreasure;
-
-                                    if (bestResult == null || totalScore > bestResult.TotalScore)
-                                    {
-                                        bestResult = new MemoValue(newHealth, totalTreasure,
-                                            moveSymbols[i] + nextResult.Path);
-                                    }
-                                }
-                            }
-                            else if (ny == height) // Reached the end of the dungeon
-                            {
-                                // No cell effects at the end
-                                if (bestResult == null || health > bestResult.TotalScore)
-                                {
-                                    bestResult = new MemoValue(health, 0, moveSymbols[i]);
-                                }
-                            }
-                        }
-
-                        if (bestResult != null)
-                        {
-                            cache[y, x, health] = bestResult;
-                        }
+                        maxTotalScore = currentState.HeroScore;
+                        bestEndState = currentState;
                     }
+
+                    continue;
+                }
+
+                // Generate possible moves
+                foreach (var move in Constants.GetMoves()) // ["↓", "←", "→"]
+                {
+                    // Check movement constraints
+                    if (move == Constants.MoveLeft && currentState.MoveConstraint == MovementConstraint.Left)
+                        continue; // Cannot move left due to constraint
+                    if (move == Constants.MoveRight && currentState.MoveConstraint == MovementConstraint.Right)
+                        continue; // Cannot move right due to constraint
+
+                    // Determine new position and movement constraint
+                    int newX = currentState.HeroX;
+                    int newY = currentState.HeroY;
+                    MovementConstraint newMoveConstraint = currentState.MoveConstraint;
+
+                    switch (move)
+                    {
+                        case Constants.MoveDown:
+                            newY += 1;
+                            newMoveConstraint = MovementConstraint.None;
+                            break;
+                        case Constants.MoveLeft:
+                            newX -= 1;
+                            newMoveConstraint = MovementConstraint.Right;
+                            break;
+                        case Constants.MoveRight:
+                            newX += 1;
+                            newMoveConstraint = MovementConstraint.Left;
+                            break;
+                    }
+
+                    // Check if new position is within bounds
+                    if (newX < 0 || newX >= initialState.DungeonWidth)
+                        continue;
+
+                    // Get new health and score
+                    int newHealth = currentState.HeroHealth;
+                    int newScore = currentState.HeroScore;
+
+                    // Copy the monsters and treasures arrays
+                    var newMonsters = initialState.CopyArray(initialState.Monsters);
+                    var newTreasures = initialState.CopyArray(initialState.Treasures);
+
+                    // Check for out-of-bounds (after moving down from the bottom row)
+                    if (newY < initialState.DungeonHeight)
+                    {
+                        // Resolve cell
+                        int cellMonster = newMonsters[newY][newX];
+                        int cellTreasure = newTreasures[newY][newX];
+
+                        if (cellMonster > 0)
+                        {
+                            newHealth -= cellMonster;
+                            newMonsters[newY][newX] = 0;
+                        }
+
+                        if (cellTreasure > 0)
+                        {
+                            newScore += cellTreasure;
+                            newTreasures[newY][newX] = 0;
+                        }
+
+                        if (newHealth <= 0)
+                            continue; // Hero dies, skip this path
+                    }
+
+                    // Create new state
+                    var newState = new DPState(newX, newY, newMoveConstraint, newHealth, newScore);
+
+                    // Check if this state is better than any previously recorded state at this position with the same movement constraint
+                    if (dp.TryGetValue(newState, out var existingState))
+                    {
+                        if (newScore <= existingState.totalScore)
+                            continue; // Existing state is better or equal
+                    }
+
+                    // Update DP table
+                    dp[newState] = (newScore, currentState, move);
+                    queue.Enqueue(newState);
                 }
             }
 
-            // Apply cell effects at the starting cell
-            int startX = state.HeroX;
-            int startY = state.HeroY;
-            int startHealth = state.HeroHealth;
-            int initialHealth = startHealth;
-            int initialTreasure = 0;
-            ApplyCellEffects(startX, startY, state, ref initialHealth, ref initialTreasure);
+            // If no valid path found
+            if (bestEndState == null)
+                return "There is no valid path.";
 
-            if (initialHealth <= 0)
+            // Reconstruct the path from the best end state
+            var pathMoves = new Stack<string>();
+            var state = bestEndState;
+
+            while (dp[state].predecessor != null)
             {
-                return "";
+                var move = dp[state].move;
+                pathMoves.Push(move);
+                state = dp[state].predecessor;
             }
 
-            MemoValue? result = cache[startY, startX, initialHealth];
-            return result?.Path ?? "";
-        }
-
-        // Apply the effects of the cell (monsters and treasures)
-        private static void ApplyCellEffects(int x, int y, State state, ref int health, ref int treasureCollected)
-        {
-            // Subtract monster strength from health
-            health -= state.Monsters[y][x];
-
-            // Add treasure value to treasureCollected
-            treasureCollected += state.Treasures[y][x];
+            return string.Join("", pathMoves);
         }
     }
 }

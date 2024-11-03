@@ -3,61 +3,50 @@ namespace G3.TreasuresMonsters.Models;
 /// <summary>
 /// State object : contains everything related to a game's current state
 /// </summary>
-public class State
+public class State(
+    int[] heroPos,
+    int heroHealth,
+    int heroScore,
+    int[][] monsters,
+    int[][] treasures,
+    int nbHint,
+    int nbLevel)
 {
-    public State(
-        int[] heroPos,
-        int heroHealth,
-        int heroScore,
-        int[][] monsters,
-        int[][] treasures,
-        int nbHint,
-        int nbLevel)
-    {
-        HeroPos = heroPos;
-        HeroHealth = heroHealth;
-        HeroScore = heroScore;
-        Monsters = monsters;
-        Treasures = treasures;
-        NbHint = nbHint;
-        NbLevel = nbLevel;
-    }
-    
     /// <summary>
     /// Current position of the hero in the level
     /// </summary>
-    public int[] HeroPos { get; private set; }
-    
+    public int[] HeroPos { get; private set; } = heroPos;
+
     /// <summary>
     /// Current health of the hero, between 0 and 100
     /// </summary>
-    public int HeroHealth { get; private set; }
-    
+    public int HeroHealth { get; private set; } = heroHealth;
+
     /// <summary>
     /// Current score of the hero
     /// </summary>
-    public int HeroScore { get; private set; }
-    
+    public int HeroScore { get; private set; } = heroScore;
+
     /// <summary>
     /// Monsters in the current level
     /// </summary>
-    public int[][] Monsters { get; private set; }
-    
+    public int[][] Monsters { get; private set; } = monsters;
+
     /// <summary>
     /// Treasures in the current level
     /// </summary>
-    public int[][] Treasures { get; private set; }
-    
+    public int[][] Treasures { get; private set; } = treasures;
+
     /// <summary>
     /// Number of hints available to the player
     /// </summary>
-    public int NbHint { get; private set; }
-    
+    public int NbHint { get; private set; } = nbHint;
+
     /// <summary>
     /// Current level number, starting at 1 and going up
     /// </summary>
-    public int NbLevel { get; private set; }
-    
+    public int NbLevel { get; private set; } = nbLevel;
+
     // Additional properties
     public int DungeonScoreToBeat { get; private set; }
     public MovementConstraint HeroMoveConstraint { get; private set; } = MovementConstraint.None;
@@ -67,24 +56,7 @@ public class State
     public bool HeroIsDead => HeroHealth <= 0;
     public int DungeonHeight => Monsters.Length;
     public int DungeonWidth => Monsters[0].Length;
-    
-    public State Copy()
-    {
-        int[] heroPos = [HeroPos[0], HeroPos[1]];
-        var monsters = CopyArray(Monsters);
-        var treasures = CopyArray(Treasures);
-        
-        return new State(
-            heroPos,
-            HeroHealth,
-            HeroScore,
-            monsters,
-            treasures,
-            NbHint,
-            NbLevel
-        );
-    }
-    
+
     public int[][] CopyArray(int[][] array)
     {
         var copy = new int[array.Length][];
@@ -104,25 +76,7 @@ public class State
         
         return copy;
     }
-    
-    public void ApplyMove(string move)
-    {
-        switch (move)
-        {
-            case Constants.MoveDown:
-                MoveDown();
-                break;
-            case Constants.MoveLeft:
-                MoveLeft();
-                break;
-            case Constants.MoveRight:
-                MoveRight();
-                break;
-            default:
-                throw new ArgumentException("Invalid move");
-        }
-    }
-    
+
     public bool CanMoveLeft()
     {
         if (HeroMoveConstraint == MovementConstraint.Left)
