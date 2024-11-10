@@ -236,7 +236,6 @@ public class State(
             }
         }
         
-        // TODO: Calculate the score to beat
         DungeonScoreToBeat = Algorithms.GS.GreedySolution(this);
     }
 }
