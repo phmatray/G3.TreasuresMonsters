@@ -48,18 +48,18 @@ public static partial class Algorithms
                 // Swap positions via tuple deconstruction
                 (availablePositions[i], availablePositions[j]) = (availablePositions[j], availablePositions[i]);
             }
-            
-            int treasureCount = 0;
+
             for (int i = 0; i < availablePositions.Length; i++)
             {
                 int x = availablePositions[i];
-                bool isTreasure = Rng.Next(6) == 0;
-                bool isMonster = Rng.Next(3) == 0;
+                var randomValue = Rng.Next(6);
                 
-                if (isTreasure && treasureCount < 2) // 1 in 6 chance to place a treasure, max 2 treasures
+                bool isTreasure = randomValue == 0;
+                bool isMonster = randomValue is 1 or 2;
+                
+                if (isTreasure) // 1 in 6 chance to place a treasure, max 2 treasures
                 {
                     treasuresRow[x] = Rng.Next(1, 100); // Random treasure value between 1 and 99
-                    treasureCount++;
                 }
                 else if (isMonster) // 1 in 3 chance to place a monster
                 {
@@ -98,7 +98,7 @@ public static partial class Algorithms
         // Method to generate a unique signature for a row
         internal static string GetRowSignature(int[] monstersRow, int[] treasuresRow)
         {
-            var sb = new System.Text.StringBuilder();
+            var sb = new StringBuilder();
 
             for (int i = 0; i < monstersRow.Length; i++)
             {
