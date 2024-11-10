@@ -7,7 +7,7 @@ public static partial class Algorithms
     /* --- Dynamic Programming --- */
     public static class DP
     {
-        // Signature de la méthode en Java :
+        // Signature of the method with Java :
         // String perfectSolution(State state)
         // https://algodaily.com/lessons/memoization-in-dynamic-programming/csharp
         public static string PerfectSolution(State initialState)
@@ -62,6 +62,7 @@ public static partial class Algorithms
                         highestScoreAchieved = currentTotalScore;
                         bestEndState = currentState;
                     }
+
                     continue;
                 }
 
@@ -82,71 +83,31 @@ public static partial class Algorithms
                 if (!IsValidMove(currentState.MoveConstraint, move))
                     continue;
 
-                var (newX, newY, newMoveConstraint) = GetNewPositionAndConstraint(currentState, move);
+                var positionResult = GetNewPositionAndConstraint(currentState.X, currentState.Y,
+                    currentState.MoveConstraint, move);
 
-                if (newX < 0 || newX >= initialState.DungeonWidth)
+                if (positionResult.X < 0 || positionResult.X >= initialState.DungeonWidth)
                     continue;
 
-                var (newHealth, newScore) = GetUpdatedState(initialState, currentState, newX, newY);
+                var stateResult =
+                    GetUpdatedState(initialState, currentState, positionResult.X, positionResult.Y);
 
-                if (newHealth <= 0)
+                if (stateResult.Health <= 0)
                     continue;
 
-                var newState = new HeroState(newX, newY, newHealth, newScore, newMoveConstraint);
+                var newState = new HeroState(positionResult.X, positionResult.Y, stateResult.Health, stateResult.Score,
+                    positionResult.MoveConstraint);
 
                 bool isBetterScore =
                     !dp.TryGetValue(newState, out var existingState) ||
-                    newScore > existingState.TotalScore;
-                
+                    newState.Score > existingState.TotalScore;
+
                 if (isBetterScore)
                 {
-                    dp[newState] = new DynamicProgramingRecord(newScore, currentState, move);
+                    dp[newState] = new DynamicProgramingRecord(newState.Score, currentState, move);
                     queue.Enqueue(newState);
                 }
             }
-        }
-
-        private static bool IsValidMove(MovementConstraint moveConstraint, string move)
-        {
-            return !(move == Constants.MoveLeft && moveConstraint == MovementConstraint.Left) &&
-                   !(move == Constants.MoveRight && moveConstraint == MovementConstraint.Right);
-        }
-
-        private static PositionResult GetNewPositionAndConstraint(HeroState currentState, string move)
-        {
-            var (newX, newY) = (HeroX: currentState.X, HeroY: currentState.Y);
-            var newMoveConstraint = currentState.MoveConstraint;
-
-            switch (move)
-            {
-                case Constants.MoveDown:
-                    newY++;
-                    newMoveConstraint = MovementConstraint.None;
-                    break;
-                case Constants.MoveLeft:
-                    newX--;
-                    newMoveConstraint = MovementConstraint.Right;
-                    break;
-                case Constants.MoveRight:
-                    newX++;
-                    newMoveConstraint = MovementConstraint.Left;
-                    break;
-            }
-
-            return new PositionResult(newX, newY, newMoveConstraint);
-        }
-
-        private static HeroStateUpdateResult GetUpdatedState(State initialState, HeroState currentState, int newX, int newY)
-        {
-            if (newY >= initialState.DungeonHeight)
-            {
-                return new HeroStateUpdateResult(currentState.Health, currentState.Score);
-            }
-
-            int newHealth = currentState.Health - Math.Max(0, initialState.Monsters[newY][newX]);
-            int newScore = currentState.Score + Math.Max(0, initialState.Treasures[newY][newX]);
-
-            return new HeroStateUpdateResult(newHealth, newScore);
         }
 
         private static string ReconstructPath(Dictionary<HeroState, DynamicProgramingRecord> dp, HeroState bestEndState)
