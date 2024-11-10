@@ -1,29 +1,9 @@
+using G3.TreasuresMonsters.Features.Logic.Models;
+
 namespace G3.TreasuresMonsters.Features.Logic;
-
-public record DPState(
-    int HeroX,
-    int HeroY,
-    MovementConstraint MoveConstraint,
-    int HeroHealth,
-    int HeroScore);
-
-public record DPRecord(
-    int TotalScore,
-    DPState? Predecessor,
-    string? Move);
-
-public record DPNewPositionResult(
-    int NewX,
-    int NewY,
-    MovementConstraint NewMoveConstraint);
-
-public record DPUpdatedStateResult(
-    int NewHealth,
-    int NewScore);
 
 public static partial class Algorithms
 {
-
     /* --- Dynamic Programming --- */
     public static class DP
     {
@@ -35,8 +15,8 @@ public static partial class Algorithms
             if (initialState.HeroHealth <= 0)
                 return "<DEAD>";
 
-            var dp = new Dictionary<DPState, DPRecord>();
-            var queue = new Queue<DPState>();
+            var dp = new Dictionary<HeroState, DynamicProgramingRecord>();
+            var queue = new Queue<HeroState>();
 
             InitializeStartState(initialState, dp, queue);
 
@@ -49,36 +29,34 @@ public static partial class Algorithms
 
         private static void InitializeStartState(
             State initialState,
-            Dictionary<DPState, DPRecord> dp,
-            Queue<DPState> queue)
+            Dictionary<HeroState, DynamicProgramingRecord> dp,
+            Queue<HeroState> queue)
         {
-            var startState = new DPState(
+            var startState = new HeroState(
                 initialState.HeroX,
                 initialState.HeroY,
-                MovementConstraint.None,
                 initialState.HeroHealth,
-                0
-            );
+                0, MovementConstraint.None);
 
-            dp[startState] = new DPRecord(initialState.HeroScore, null, null);
+            dp[startState] = new DynamicProgramingRecord(initialState.HeroScore, null, null);
             queue.Enqueue(startState);
         }
 
-        private static DPState? ProcessQueue(
+        private static HeroState? ProcessQueue(
             State initialState,
-            Dictionary<DPState, DPRecord> dp,
-            Queue<DPState> queue)
+            Dictionary<HeroState, DynamicProgramingRecord> dp,
+            Queue<HeroState> queue)
         {
             int highestScoreAchieved = 0;
-            DPState? bestEndState = null;
+            HeroState? bestEndState = null;
 
             while (queue.Count > 0)
             {
                 var currentState = queue.Dequeue();
 
-                if (currentState.HeroY >= initialState.DungeonHeight)
+                if (currentState.Y >= initialState.DungeonHeight)
                 {
-                    int currentTotalScore = currentState.HeroScore + currentState.HeroHealth;
+                    int currentTotalScore = currentState.Score + currentState.Health;
                     if (currentTotalScore > highestScoreAchieved)
                     {
                         highestScoreAchieved = currentTotalScore;
@@ -95,9 +73,9 @@ public static partial class Algorithms
 
         private static void GenerateAndProcessMoves(
             State initialState,
-            DPState currentState,
-            Dictionary<DPState, DPRecord> dp,
-            Queue<DPState> queue)
+            HeroState currentState,
+            Dictionary<HeroState, DynamicProgramingRecord> dp,
+            Queue<HeroState> queue)
         {
             foreach (var move in Constants.GetMoves())
             {
@@ -114,7 +92,7 @@ public static partial class Algorithms
                 if (newHealth <= 0)
                     continue;
 
-                var newState = new DPState(newX, newY, newMoveConstraint, newHealth, newScore);
+                var newState = new HeroState(newX, newY, newHealth, newScore, newMoveConstraint);
 
                 bool isBetterScore =
                     !dp.TryGetValue(newState, out var existingState) ||
@@ -122,7 +100,7 @@ public static partial class Algorithms
                 
                 if (isBetterScore)
                 {
-                    dp[newState] = new DPRecord(newScore, currentState, move);
+                    dp[newState] = new DynamicProgramingRecord(newScore, currentState, move);
                     queue.Enqueue(newState);
                 }
             }
@@ -134,9 +112,9 @@ public static partial class Algorithms
                    !(move == Constants.MoveRight && moveConstraint == MovementConstraint.Right);
         }
 
-        private static DPNewPositionResult GetNewPositionAndConstraint(DPState currentState, string move)
+        private static PositionResult GetNewPositionAndConstraint(HeroState currentState, string move)
         {
-            var (newX, newY) = (currentState.HeroX, currentState.HeroY);
+            var (newX, newY) = (HeroX: currentState.X, HeroY: currentState.Y);
             var newMoveConstraint = currentState.MoveConstraint;
 
             switch (move)
@@ -155,23 +133,23 @@ public static partial class Algorithms
                     break;
             }
 
-            return new DPNewPositionResult(newX, newY, newMoveConstraint);
+            return new PositionResult(newX, newY, newMoveConstraint);
         }
 
-        private static DPUpdatedStateResult GetUpdatedState(State initialState, DPState currentState, int newX, int newY)
+        private static HeroStateUpdateResult GetUpdatedState(State initialState, HeroState currentState, int newX, int newY)
         {
             if (newY >= initialState.DungeonHeight)
             {
-                return new DPUpdatedStateResult(currentState.HeroHealth, currentState.HeroScore);
+                return new HeroStateUpdateResult(currentState.Health, currentState.Score);
             }
 
-            int newHealth = currentState.HeroHealth - Math.Max(0, initialState.Monsters[newY][newX]);
-            int newScore = currentState.HeroScore + Math.Max(0, initialState.Treasures[newY][newX]);
+            int newHealth = currentState.Health - Math.Max(0, initialState.Monsters[newY][newX]);
+            int newScore = currentState.Score + Math.Max(0, initialState.Treasures[newY][newX]);
 
-            return new DPUpdatedStateResult(newHealth, newScore);
+            return new HeroStateUpdateResult(newHealth, newScore);
         }
 
-        private static string ReconstructPath(Dictionary<DPState, DPRecord> dp, DPState bestEndState)
+        private static string ReconstructPath(Dictionary<HeroState, DynamicProgramingRecord> dp, HeroState bestEndState)
         {
             return dp[bestEndState].Predecessor != null
                 ? ReconstructPath(dp, dp[bestEndState].Predecessor) + dp[bestEndState].Move
