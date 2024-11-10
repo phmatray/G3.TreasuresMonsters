@@ -57,41 +57,24 @@ public static partial class Algorithms
 
         return new PositionResult(newX, newY, newMoveConstraint);
     }
-
-    // Updates the hero's health and score based on the new position
-    public static HeroStateUpdateResult GetUpdatedState(
-        State state,
-        int x,
-        int y,
-        int health,
-        int score)
-    {
-        if (y >= state.DungeonHeight)
-        {
-            return new HeroStateUpdateResult(health, score);
-        }
-
-        int newHealth = health - Math.Max(0, state.Monsters[y][x]);
-        int newScore = score + Math.Max(0, state.Treasures[y][x]);
-
-        return new HeroStateUpdateResult(newHealth, newScore);
-    }
-
-    // Overload for DP algorithm, using current HeroState
-    public static HeroStateUpdateResult GetUpdatedState(
+    
+    // Updates the hero's state based on the new position
+    public static HeroState GetUpdatedState(
         State state,
         HeroState currentState,
         int newX,
-        int newY)
+        int newY,
+        MovementConstraint newMoveConstraint)
     {
         if (newY >= state.DungeonHeight)
         {
-            return new HeroStateUpdateResult(currentState.Health, currentState.Score);
+            // Hero has reached the end; return current state with updated position
+            return new HeroState(newX, newY, currentState.Health, currentState.Score, newMoveConstraint);
         }
 
         int newHealth = currentState.Health - Math.Max(0, state.Monsters[newY][newX]);
         int newScore = currentState.Score + Math.Max(0, state.Treasures[newY][newX]);
 
-        return new HeroStateUpdateResult(newHealth, newScore);
+        return new HeroState(newX, newY, newHealth, newScore, newMoveConstraint);
     }
 }

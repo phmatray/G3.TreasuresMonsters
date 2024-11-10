@@ -7,12 +7,14 @@ public static partial class Algorithms
     /* --- Greedy Search --- */
     public static class GS
     {
+        public const int DefaultDepthLimit = 5;
+        
         // Signature of the method:
         // int GreedySolution(State state)
         public static int GreedySolution(State state)
         {
             var hero = new HeroState(state.HeroX, state.HeroY, state.HeroHealth, 0, MovementConstraint.None);
-            int remainingDepth = 5; // Set the total depth limit
+            int remainingDepth = DefaultDepthLimit; // Set the total depth limit
 
             while (hero.Y < state.DungeonHeight && hero.Health > 0 && remainingDepth > 0)
             {
@@ -42,26 +44,22 @@ public static partial class Algorithms
                 if (!IsValidMove(hero.MoveConstraint, move))
                     continue;
 
-                var positionResult =
-                    GetNewPositionAndConstraint(hero.X, hero.Y, hero.MoveConstraint, move);
+                var positionResult = GetNewPositionAndConstraint(hero.X, hero.Y, hero.MoveConstraint, move);
 
                 if (!IsValidPosition(state, positionResult))
                     continue;
 
-                var stateResult = GetUpdatedState(state, positionResult.X, positionResult.Y,
-                    hero.Health, hero.Score);
+                var newHeroState = GetUpdatedState(state, hero, positionResult.X, positionResult.Y, positionResult.MoveConstraint);
 
-                if (stateResult.Health <= 0)
+                if (newHeroState.Health <= 0)
                     continue;
 
-                int value = EvaluatePosition(state, positionResult.X, positionResult.Y, stateResult.Health,
-                    stateResult.Score, remainingDepth - 1, positionResult.MoveConstraint);
+                int value = EvaluatePosition(state, newHeroState, remainingDepth - 1);
 
                 if (value > bestValue)
                 {
                     bestValue = value;
-                    bestHeroState = new HeroState(positionResult.X, positionResult.Y, stateResult.Health,
-                        stateResult.Score, positionResult.MoveConstraint);
+                    bestHeroState = newHeroState;
                 }
             }
 
@@ -71,38 +69,35 @@ public static partial class Algorithms
         // Function to evaluate the position with limited depth
         private static int EvaluatePosition(
             State state,
-            int x,
-            int y,
-            int health,
-            int score,
-            int depth,
-            MovementConstraint moveConstraint)
+            HeroState hero,
+            int depth)
         {
-            if (depth == 0 || health <= 0 || y >= state.DungeonHeight)
+            if (depth == 0 || hero.Health <= 0 || hero.Y >= state.DungeonHeight)
             {
-                return health <= 0 ? 0 : score;
+                return hero.Health <= 0 ? 0 : hero.Score;
             }
 
-            int maxValue = score; // Start with current score
+            int maxValue = hero.Score;
 
-            foreach (var move in Constants.GetMoves())
+            var moves = Constants.GetMoves();
+            for (var index = 0; index < moves.Length; index++)
             {
-                if (!IsValidMove(moveConstraint, move))
+                var move = moves[index];
+                if (!IsValidMove(hero.MoveConstraint, move))
                     continue;
 
-                var positionResult = GetNewPositionAndConstraint(x, y, moveConstraint, move);
+                var positionResult = GetNewPositionAndConstraint(hero.X, hero.Y, hero.MoveConstraint, move);
 
                 if (!IsValidPosition(state, positionResult))
                     continue;
 
-                var stateResult =
-                    GetUpdatedState(state, positionResult.X, positionResult.Y, health, score);
+                var newHeroState = GetUpdatedState(state, hero, positionResult.X, positionResult.Y,
+                    positionResult.MoveConstraint);
 
-                if (stateResult.Health <= 0)
+                if (newHeroState.Health <= 0)
                     continue;
 
-                int value = EvaluatePosition(state, positionResult.X, positionResult.Y, stateResult.Health,
-                    stateResult.Score, depth - 1, positionResult.MoveConstraint);
+                int value = EvaluatePosition(state, newHeroState, depth - 1);
 
                 if (value > maxValue)
                 {

@@ -78,34 +78,33 @@ public static partial class Algorithms
             Dictionary<HeroState, DynamicProgramingRecord> dp,
             Queue<HeroState> queue)
         {
-            foreach (var move in Constants.GetMoves())
+            var moves = Constants.GetMoves();
+            for (var index = 0; index < moves.Length; index++)
             {
+                var move = moves[index];
                 if (!IsValidMove(currentState.MoveConstraint, move))
                     continue;
 
-                var positionResult = GetNewPositionAndConstraint(currentState.X, currentState.Y,
-                    currentState.MoveConstraint, move);
+                var positionResult =
+                    GetNewPositionAndConstraint(currentState.X, currentState.Y, currentState.MoveConstraint, move);
 
                 if (positionResult.X < 0 || positionResult.X >= initialState.DungeonWidth)
                     continue;
 
-                var stateResult =
-                    GetUpdatedState(initialState, currentState, positionResult.X, positionResult.Y);
-
-                if (stateResult.Health <= 0)
-                    continue;
-
-                var newState = new HeroState(positionResult.X, positionResult.Y, stateResult.Health, stateResult.Score,
+                var newHeroState = GetUpdatedState(initialState, currentState, positionResult.X, positionResult.Y,
                     positionResult.MoveConstraint);
 
+                if (newHeroState.Health <= 0)
+                    continue;
+
                 bool isBetterScore =
-                    !dp.TryGetValue(newState, out var existingState) ||
-                    newState.Score > existingState.TotalScore;
+                    !dp.TryGetValue(newHeroState, out var existingState) ||
+                    newHeroState.Score > existingState.TotalScore;
 
                 if (isBetterScore)
                 {
-                    dp[newState] = new DynamicProgramingRecord(newState.Score, currentState, move);
-                    queue.Enqueue(newState);
+                    dp[newHeroState] = new DynamicProgramingRecord(newHeroState.Score, currentState, move);
+                    queue.Enqueue(newHeroState);
                 }
             }
         }
