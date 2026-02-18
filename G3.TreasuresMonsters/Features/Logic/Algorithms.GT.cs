@@ -98,7 +98,7 @@ public static partial class Algorithms
         // Method to generate a unique signature for a row
         internal static string GetRowSignature(int[] monstersRow, int[] treasuresRow)
         {
-            var sb = new System.Text.StringBuilder();
+            var sb = new StringBuilder();
 
             for (int i = 0; i < monstersRow.Length; i++)
             {
