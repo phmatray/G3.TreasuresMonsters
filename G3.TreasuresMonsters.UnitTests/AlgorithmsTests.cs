@@ -3,13 +3,12 @@ using static G3.TreasuresMonsters.Logic.Algorithms;
 
 namespace G3.TreasuresMonsters.UnitTests;
 
-[TestFixture]
 public class AlgorithmsTests
 {
     private const int Width = 7;
     private const int Height = 5;
 
-    [Test]
+    [Fact]
     public void GenerateMonstersAndTreasures_ShouldGenerateValidLevel()
     {
         // Arrange
@@ -33,32 +32,28 @@ public class AlgorithmsTests
                 {
                     monsterCount++;
                     totalMonsterStrength += monsters[y][x];
-                    Assert.That(monsters[y][x] >= 1 && monsters[y][x] <= 50,
-                        $"Monster strength out of bounds at ({x}, {y})");
+                    Assert.True(monsters[y][x] >= 1 && monsters[y][x] <= 50);
                 }
 
                 if (treasures[y][x] > 0)
                 {
                     treasureCount++;
                     totalTreasureValue += treasures[y][x];
-                    Assert.That(treasures[y][x] >= 1 && treasures[y][x] <= 99,
-                        $"Treasure value out of bounds at ({x}, {y})");
+                    Assert.True(treasures[y][x] >= 1 && treasures[y][x] <= 99);
                 }
 
                 // Ensure a cell is not both monster and treasure
-                Assert.That(monsters[y][x] > 0 && treasures[y][x] > 0, Is.False,
-                    $"Cell at ({x}, {y}) contains both monster and treasure");
+                Assert.False(monsters[y][x] > 0 && treasures[y][x] > 0);
             }
 
             // Validate constraints
-            Assert.That(monsterCount >= 2, $"Row {y} has less than 2 monsters");
-            Assert.That(treasureCount <= 2, $"Row {y} has more than 2 treasures");
-            Assert.That(totalTreasureValue <= totalMonsterStrength,
-                $"Row {y} treasures value exceeds monsters strength");
+            Assert.True(monsterCount >= 2);
+            Assert.True(treasureCount <= 2);
+            Assert.True(totalTreasureValue <= totalMonsterStrength);
         }
     }
 
-    [Test]
+    [Fact]
     public void SortLevel_ShouldSortRowsCorrectly()
     {
         // Arrange
@@ -108,11 +103,11 @@ public class AlgorithmsTests
         // Check if the row values are in ascending order
         for (int i = 1; i < rowValues.Count; i++)
         {
-            Assert.That(rowValues[i - 1] <= rowValues[i], $"Rows are not sorted correctly at index {i}");
+            Assert.True(rowValues[i - 1] <= rowValues[i]);
         }
     }
 
-    [Test]
+    [Fact]
     public void GreedySolution_ShouldReturnNonOptimalScore()
     {
         // Arrange
@@ -137,10 +132,10 @@ public class AlgorithmsTests
         // The greedy algorithm should avoid the high-strength monster
         // and not collect the high-value treasure
         int expectedGreedyScore = 100; // Health remains the same, no treasures collected
-        Assert.That(greedyScore, Is.EqualTo(expectedGreedyScore), "Greedy solution did not return the expected score");
+        Assert.Equal(expectedGreedyScore, greedyScore);
     }
 
-    [Test]
+    [Fact]
     public void PerfectSolution_ShouldReturnOptimalPath()
     {
         // Arrange
@@ -161,7 +156,7 @@ public class AlgorithmsTests
 
         // Assert
         // Expected path is "DRD" to collect both treasures
-        Assert.That(perfectPath, Is.EqualTo("DRD"), "Perfect solution did not return the expected path");
+        Assert.Equal("DRD", perfectPath);
 
         // Calculate the score following the perfect path
         int health = 100;
@@ -198,7 +193,7 @@ public class AlgorithmsTests
         var memo = new Dictionary<(int x, int y, int health), (int score, string path)>();
         var result = DP.DP_Search(state.HeroX, state.HeroY, state.HeroHealth, state, memo);
 
-        Assert.That(result.score, Is.EqualTo(expectedScore), "Perfect solution did not find the optimal score");
+        Assert.Equal(expectedScore, result.score);
     }
 
     // Helper method to create an empty grid

@@ -3,10 +3,9 @@ using G3.TreasuresMonsters.Models;
 
 namespace G3.TreasuresMonsters.Tests;
 
-[TestFixture]
 public class AlgorithmsGSTests
 {
-    [Test]
+    [Fact]
     public void GreedySolution_Should_Return_Correct_Value_For_Simplest_Dungeon()
     {
         // Test the algorithm on the simplest dungeon without monsters or treasures.
@@ -29,10 +28,10 @@ public class AlgorithmsGSTests
         int totalValue = Algorithms.GS.GreedySolution(state);
 
         // Assert
-         Assert.That(totalValue, Is.EqualTo(0), "The score should be 0 since hero has not collected any treasures.");
+         Assert.Equal(0, totalValue);
     }
     
-    [Test]
+    [Fact]
     public void GreedySolution_Should_Handle_Monsters_Correctly()
     {
         // Check that the algorithm takes into account the monsters by reducing the hero's health.
@@ -69,10 +68,10 @@ public class AlgorithmsGSTests
 
         // Assert
         // The hero loses health by facing the monsters
-        Assert.That(totalValue, Is.EqualTo(0), "The score should be 0 since the hero has not collected any treasures.");
+        Assert.Equal(0, totalValue);
     }
     
-    [Test]
+    [Fact]
     public void GreedySolution_Should_Collect_Treasures_Correctly()
     {
         // Check that the algorithm correctly accumulates treasures along the way.
@@ -108,10 +107,10 @@ public class AlgorithmsGSTests
         int totalValue = Algorithms.GS.GreedySolution(state);
 
         // Assert
-        Assert.That(totalValue, Is.EqualTo(10 + 20 + 30), "The score should be 60 since the hero has collected all treasures.");
+        Assert.Equal(10 + 20 + 30, totalValue);
     }
     
-    [Test]
+    [Fact]
     public void GreedySolution_Should_Avoid_Deadly_Paths()
     {
         // Verify that the algorithm avoids paths where the hero would die due to strong monsters.
@@ -146,10 +145,10 @@ public class AlgorithmsGSTests
         int totalValue = Algorithms.GS.GreedySolution(state);
 
         // Assert
-        Assert.That(totalValue, Is.EqualTo(0), "The score should be 0 since the hero cannot survive to collect the treasure.");
+        Assert.Equal(0, totalValue);
     }
     
-    [Test]
+    [Fact]
     public void GreedySolution_Should_Choose_Path_With_Highest_Score()
     {
         // Verify that the algorithm chooses the path that offers the highest treasure score.
@@ -185,10 +184,10 @@ public class AlgorithmsGSTests
         // Assert
         // The hero should choose the right path to collect the treasure if possible within depth limit
         // However, due to depth limitation, the hero may not reach the treasure
-        Assert.That(totalValue, Is.EqualTo(100), "The score should be 100 since the hero collects the high-value treasure.");
+        Assert.Equal(100, totalValue);
     }
     
-    [Test]
+    [Fact]
     public void GreedySolution_Should_Handle_Depth_Limitation()
     {
         // Check that the algorithm respects the depth limitation and may miss treasures beyond its depth.
@@ -231,10 +230,10 @@ public class AlgorithmsGSTests
 
         // Assert
         // The hero cannot see the treasure beyond depth limit, so the score should be 0
-        Assert.That(totalValue, Is.EqualTo(0), "The score should be 0 since the treasure is beyond the depth limit.");
+        Assert.Equal(0, totalValue);
     }
     
-    [Test]
+    [Fact]
     public void GreedySolution_Should_Find_Treasure_Within_Depth_Limit()
     {
         // Verify that the algorithm finds the treasure within the depth limit.
@@ -277,10 +276,10 @@ public class AlgorithmsGSTests
         int expectedScore = 100;
 
         // Assert
-        Assert.That(totalValueGS, Is.EqualTo(expectedScore), "The Greedy Solution should find the treasure within the depth limit.");
+        Assert.Equal(expectedScore, totalValueGS);
     }
     
-    [Test]
+    [Fact]
     public void GreedySolution_Should_Handle_Multiple_Paths_With_Same_Score()
     {
         // Verify that the algorithm can handle multiple optimal paths leading to the same score.
@@ -313,10 +312,10 @@ public class AlgorithmsGSTests
 
         // Assert
         // The hero can choose either left or right, collecting 10 treasure
-        Assert.That(totalValue, Is.EqualTo(10), "The hero should collect the maximum possible treasure of 10.");
+        Assert.Equal(10, totalValue);
     }
     
-    [Test]
+    [Fact]
     public void GreedySolution_Should_Stop_When_No_More_Moves()
     {
         // Verify that the algorithm stops correctly when there are no valid moves.
@@ -349,10 +348,10 @@ public class AlgorithmsGSTests
 
         // Assert
         // The hero cannot proceed, so the score remains 0
-        Assert.That(totalValue, Is.EqualTo(0), "The score should be 0 since the hero cannot proceed.");
+        Assert.Equal(0, totalValue);
     }
 
-    [Test]
+    [Fact]
     public void GreedySolution_Should_Handle_Real_Dungeon()
     {
         // Test the algorithm on a complex dungeon similar to the DP test.
@@ -406,11 +405,11 @@ public class AlgorithmsGSTests
 
         // Assert
         // The Greedy Solution should collect less treasure due to depth limitation
-        Assert.That(totalValueGS, Is.LessThan(expectedDPScore), "The Greedy Solution should collect less treasure due to depth limitation.");
-        Assert.That(totalValueGS, Is.EqualTo(0), "The Greedy Solution should collect some treasure.");
+        Assert.True(totalValueGS < expectedDPScore);
+        Assert.Equal(0, totalValueGS);
     }
 
-    [Test]
+    [Fact]
     public void GreedySolution_Should_Handle_Real_Dungeon_With_Tresure_Protected()
     {
         // Test the algorithm on a complex dungeon similar to the DP test.
@@ -464,7 +463,7 @@ public class AlgorithmsGSTests
 
         // Assert
         // The Greedy Solution should collect less treasure due to depth limitation
-        Assert.That(totalValueGS, Is.LessThan(expectedDPScore), "The Greedy Solution should collect less treasure due to depth limitation.");
-        Assert.That(totalValueGS, Is.EqualTo(80), "The Greedy Solution should collect some treasure.");
+        Assert.True(totalValueGS < expectedDPScore);
+        Assert.Equal(80, totalValueGS);
     }
 }
