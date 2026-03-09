@@ -2,18 +2,16 @@ using G3.TreasuresMonsters.Features.Logic;
 
 namespace G3.TreasuresMonsters.Tests;
 
-[TestFixture]
 public class AlgorithmsDCTests
 {
-    [SetUp]
-    public void SetUp()
+    public AlgorithmsDCTests()
     {
         // If there is any setup needed before each test, it can be added here.
         // For example, if Algorithms.DC uses a random number generator that needs seeding.
         // Since the DC algorithm is deterministic, no setup is required.
     }
 
-    [Test]
+    [Fact]
     public void SortLevel_Should_Sort_Rows_By_RowValue()
     {
         // Arrange
@@ -55,10 +53,10 @@ public class AlgorithmsDCTests
         int[] expectedRowValues = [-10, 5, 13, 15];
 
         // Assert
-        Assert.That(actualRowValues, Is.EqualTo(expectedRowValues), "Rows are not sorted correctly by RowValue.");
+        Assert.Equal(expectedRowValues, actualRowValues);
     }
 
-    [Test]
+    [Fact]
     public void SortLevel_Should_Handle_Empty_Rows_Correctly()
     {
         // Arrange
@@ -97,10 +95,10 @@ public class AlgorithmsDCTests
         int[] expectedRowValues = [0, 0, 1];
 
         // Assert
-        Assert.That(actualRowValues, Is.EqualTo(expectedRowValues), "Empty rows are not handled correctly.");
+        Assert.Equal(expectedRowValues, actualRowValues);
     }
 
-    [Test]
+    [Fact]
     public void SortLevel_Should_Handle_Single_Row()
     {
         // Arrange
@@ -128,10 +126,10 @@ public class AlgorithmsDCTests
         int expectedRowValue = -15;
 
         // Assert
-        Assert.That(actualRowValue, Is.EqualTo(expectedRowValue), "Single row is not handled correctly.");
+        Assert.Equal(expectedRowValue, actualRowValue);
     }
 
-    [Test]
+    [Fact]
     public void SortLevel_Should_Sort_Rows_With_Same_RowValue_Correctly()
     {
         // Arrange
@@ -167,10 +165,10 @@ public class AlgorithmsDCTests
         int[] expectedRowValues = [5, 5, 5];
 
         // Assert
-        Assert.That(actualRowValues, Is.EqualTo(expectedRowValues), "Rows with same RowValue are not sorted correctly.");
+        Assert.Equal(expectedRowValues, actualRowValues);
     }
 
-    [Test]
+    [Fact]
     public void SortLevel_Should_Not_Modify_Row_Content()
     {
         // Arrange
@@ -197,11 +195,11 @@ public class AlgorithmsDCTests
 
         // Assert that the content of the rows has not been modified (order may have changed)
         // We need to compare the sets of rows, regardless of their order
-        Assert.That(monstersToSort, Is.EquivalentTo(expectedMonsters), "Monsters rows have been modified.");
-        Assert.That(treasuresToSort, Is.EquivalentTo(expectedTreasures), "Treasures rows have been modified.");
+        Assert.Equal(expectedMonsters.OrderBy(r => string.Join(",", r)).ToList(), monstersToSort.OrderBy(r => string.Join(",", r)).ToList());
+        Assert.Equal(expectedTreasures.OrderBy(r => string.Join(",", r)).ToList(), treasuresToSort.OrderBy(r => string.Join(",", r)).ToList());
     }
 
-    [Test]
+    [Fact]
     public void SortLevel_Should_Handle_Large_Input()
     {
         // Arrange
@@ -238,11 +236,11 @@ public class AlgorithmsDCTests
         // Assert that the row values are in non-decreasing order
         for (int i = 1; i < height; i++)
         {
-            Assert.That(actualRowValues[i], Is.GreaterThanOrEqualTo(actualRowValues[i - 1]), $"Row {i} is not sorted correctly.");
+            Assert.True(actualRowValues[i] >= actualRowValues[i - 1]);
         }
     }
 
-    [Test]
+    [Fact]
     public void SumArray_Should_Return_Correct_Sum()
     {
         // Arrange
@@ -252,6 +250,6 @@ public class AlgorithmsDCTests
         int sum = Algorithms.DC.SumArray(array);
 
         // Assert
-        Assert.That(sum, Is.EqualTo(15), "SumArray did not return the correct sum.");
+        Assert.Equal(15, sum);
     }
 }

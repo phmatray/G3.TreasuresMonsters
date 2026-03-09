@@ -3,10 +3,9 @@ using G3.TreasuresMonsters.Models;
 
 namespace G3.TreasuresMonsters.Tests;
 
-[TestFixture]
 public class AlgorithmsDPTests
 {
-    [Test]
+    [Fact]
     public void PerfectSolution_Should_Return_Correct_Path_For_Simplest_Dungeon()
     {
         // Tests the algorithm on the simplest possible dungeon with no monsters or treasures.
@@ -30,10 +29,10 @@ public class AlgorithmsDPTests
         string path = Algorithms.DP.PerfectSolution(state);
 
         // Assert
-        Assert.That(path, Is.EqualTo("↓"), "The path should be one step down.");
+        Assert.Equal("↓", path);
     }
     
-    [Test]
+    [Fact]
     public void PerfectSolution_Should_Return_Correct_Path_For_Simple_Dungeon()
     {
         // Tests the algorithm on a simple dungeon with no monsters or treasures.
@@ -68,10 +67,10 @@ public class AlgorithmsDPTests
         string path = Algorithms.DP.PerfectSolution(state);
 
         // Assert
-        Assert.That(path, Is.EqualTo("↓↓↓"), "The path should be three steps down.");
+        Assert.Equal("↓↓↓", path);
     }
 
-    [Test]
+    [Fact]
     public void PerfectSolution_Should_Handle_Monsters_Correctly()
     {
         // Ensures that the algorithm accounts for monsters by reducing the hero's health.
@@ -108,10 +107,10 @@ public class AlgorithmsDPTests
         string path = Algorithms.DP.PerfectSolution(state);
 
         // Assert
-        Assert.That(path, Is.EqualTo("↓↓↓↓"), "The path should be two steps down.");
+        Assert.Equal("↓↓↓↓", path);
     }
 
-    [Test]
+    [Fact]
     public void PerfectSolution_Should_Handle_Treasures_Correctly()
     {
         // Tests that the algorithm correctly accumulates treasures along the path.
@@ -147,10 +146,10 @@ public class AlgorithmsDPTests
         string path = Algorithms.DP.PerfectSolution(state);
 
         // Assert
-        Assert.That(path, Is.EqualTo("↓↓↓↓"), "The path should be two steps down.");
+        Assert.Equal("↓↓↓↓", path);
     }
 
-    [Test]
+    [Fact]
     public void PerfectSolution_Should_Avoid_Deadly_Paths()
     {
         // Verifies that the algorithm avoids paths where the hero would die due to monsters stronger than the hero's health.
@@ -184,10 +183,10 @@ public class AlgorithmsDPTests
         string path = Algorithms.DP.PerfectSolution(state);
 
         // Assert
-        Assert.That(path, Is.EqualTo("<INVALID>"), "There should be no valid path.");
+        Assert.Equal("<INVALID>", path);
     }
 
-    [Test]
+    [Fact]
     public void PerfectSolution_Should_Choose_Path_With_Max_Treasure()
     {
         // Tests whether the algorithm chooses the path that leads to the highest total score (health + treasure).
@@ -221,10 +220,10 @@ public class AlgorithmsDPTests
         string path = Algorithms.DP.PerfectSolution(state);
 
         // Assert
-        Assert.That(path, Is.EqualTo("→↓↓↓"), "The path should move right to collect the treasure.");
+        Assert.Equal("→↓↓↓", path);
     }
 
-    [Test]
+    [Fact]
     public void PerfectSolution_Should_Handle_Larger_Dungeon()
     {
         // Tests the algorithm on a larger dungeon with multiple paths, monsters, and treasures.
@@ -261,10 +260,10 @@ public class AlgorithmsDPTests
 
         // Assert
         // Expected path: →↓→↓ (Collect treasures and avoid monsters)
-        Assert.That(path, Is.EqualTo("↓→↓→↓↓"), "The path should collect the maximum treasure while avoiding monsters.");
+        Assert.Equal("↓→↓→↓↓", path);
     }
 
-    [Test]
+    [Fact]
     public void PerfectSolution_Should_Return_Empty_Path_When_No_Valid_Moves()
     {
         // Checks that the algorithm returns an empty path when the hero cannot move (e.g., starts with negative health).
@@ -294,10 +293,10 @@ public class AlgorithmsDPTests
         string path = Algorithms.DP.PerfectSolution(state);
 
         // Assert
-        Assert.That(path, Is.EqualTo("<DEAD>"), "There should be no valid path when hero health is negative.");
+        Assert.Equal("<DEAD>", path);
     }
 
-    [Test]
+    [Fact]
     public void PerfectSolution_Should_Choose_Path_With_Best_TotalScore()
     {
         // Tests that the algorithm selects the path that maximizes the total score,
@@ -333,10 +332,10 @@ public class AlgorithmsDPTests
 
         // Assert
         // The hero should avoid the high-strength monster and not risk dying
-        Assert.That(path, Is.EqualTo("→↓↓↓"), "Hero should avoid the right path with the high-strength monster.");
+        Assert.Equal("→↓↓↓", path);
     }
 
-    [Test]
+    [Fact]
     public void PerfectSolution_Should_Handle_Treasures_Exceeding_Health_Loss()
     {
         // Checks whether the algorithm chooses to take a path where the treasure value outweighs the health loss from monsters.
@@ -371,10 +370,10 @@ public class AlgorithmsDPTests
 
         // Assert
         // Despite the high health loss, the treasure makes the total score higher
-        Assert.That(path, Is.EqualTo("↓↓↓"), "Hero should take the risk for higher total score.");
+        Assert.Equal("↓↓↓", path);
     }
 
-    [Test]
+    [Fact]
     public void PerfectSolution_Should_Handle_Multiple_Paths_With_Same_Score()
     {
         // Verifies that the algorithm can handle multiple optimal paths leading to the same total score.
@@ -408,7 +407,7 @@ public class AlgorithmsDPTests
         // Assert
         // Multiple paths lead to the same total score; any optimal path is acceptable
         var possiblePaths = new HashSet<string> { "←↓↓", "→↓↓" };
-        Assert.That(possiblePaths, Does.Contain(path), "Hero should take any path with maximum total score.");
+        Assert.Contains(path, possiblePaths);
     }
     
     // EXPECTED path     : ↓↓→↓↓↓↓→↓←↓←←←↓←↓↓
@@ -425,7 +424,7 @@ public class AlgorithmsDPTests
     // ║ 💎91 .    🧟35 🧟29 🧟22 .    👾11 ║ -006
     // ║ 💰36 .    .    .    .    🧟18 🧟23 ║ -005
     // ╚════════════════════════════════════╝
-    [Test]
+    [Fact]
     public void PerfectSolution_Should_Handle_Real_Dungeon()
     {
         // Arrange
@@ -473,6 +472,6 @@ public class AlgorithmsDPTests
         string path = Algorithms.DP.PerfectSolution(state);
         
         // Assert
-        Assert.That(path, Is.EqualTo("↓↓→↓↓↓↓→↓←↓←←←↓←↓↓"), "The path should collect the maximum treasure while avoiding monsters.");
+        Assert.Equal("↓↓→↓↓↓↓→↓←↓←←←↓←↓↓", path);
     }
 }
