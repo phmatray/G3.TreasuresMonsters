@@ -1,3 +1,5 @@
+![G3.TreasuresMonsters banner](.github/banner.png)
+
 # G3.TreasuresMonsters — Console Treasures & Monsters game
 
 A feature-driven console game where players explore dungeons, collect treasures, and battle monsters. Built in C# with a clean model-feature architecture and straightforward game loop.
