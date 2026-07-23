@@ -38,6 +38,17 @@ dotnet run --project G3.TreasuresMonsters
 # Use arrow keys to move, collect T (treasures), avoid M (monsters)
 ```
 
+<!-- portfolio-techstack:start -->
+
+## Tech Stack
+
+- **.NET 10**
+- xunit.v3
+- xunit.runner.visualstudio
+- Microsoft.Extensions.DependencyInjection
+
+<!-- portfolio-techstack:end -->
+
 ## 📄 License
 MIT — see LICENSE
 
