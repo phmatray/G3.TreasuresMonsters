@@ -15,6 +15,20 @@
 [![Last commit](https://img.shields.io/github/last-commit/phmatray/G3.TreasuresMonsters)](https://github.com/phmatray/G3.TreasuresMonsters/commits)
 <!-- portfolio-badges:end -->
 
+<!-- portfolio-toc:start -->
+
+## Table of Contents
+
+- [✨ Features](#-features)
+- [📦 Installation](#-installation)
+- [🚀 Quick Start](#-quick-start)
+- [Tech Stack](#tech-stack)
+- [📄 License](#-license)
+- [Contributing](#contributing)
+
+<!-- portfolio-toc:end -->
+
+
 
 A feature-driven console game where players explore dungeons, collect treasures, and battle monsters. Built in C# with a clean model-feature architecture and straightforward game loop.
 
