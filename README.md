@@ -63,6 +63,14 @@ dotnet run --project G3.TreasuresMonsters
 
 <!-- portfolio-techstack:end -->
 
+<!-- portfolio-roadmap:start -->
+
+## Roadmap
+
+Planned work and known limitations are tracked in the [open issues](https://github.com/phmatray/G3.TreasuresMonsters/issues). Contributions toward them are welcome.
+
+<!-- portfolio-roadmap:end -->
+
 ## 📄 License
 MIT — see LICENSE
 
