@@ -8,6 +8,7 @@
 ![Top language](https://img.shields.io/github/languages/top/phmatray/G3.TreasuresMonsters)
 [![Stars](https://img.shields.io/github/stars/phmatray/G3.TreasuresMonsters?style=social)](https://github.com/phmatray/G3.TreasuresMonsters/stargazers)
 [![Forks](https://img.shields.io/github/forks/phmatray/G3.TreasuresMonsters?style=social)](https://github.com/phmatray/G3.TreasuresMonsters/network/members)
+[![License](https://img.shields.io/github/license/phmatray/G3.TreasuresMonsters)](https://github.com/phmatray/G3.TreasuresMonsters/blob/HEAD/LICENSE)
 
 <!-- Activity -->
 [![Issues](https://img.shields.io/github/issues/phmatray/G3.TreasuresMonsters)](https://github.com/phmatray/G3.TreasuresMonsters/issues)
