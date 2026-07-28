@@ -8,6 +8,11 @@
 
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <!-- xunit.v3 est auto-heberge (Microsoft.Testing.Platform) et ne porte PAS
+         Microsoft.NET.Test.Sdk. Sans cette propriete, `dotnet test` bascule sur
+         VSTest, ne trouve aucun testhost et rend « Test Run Aborted » : les 38
+         tests de ce projet ne s'executaient nulle part. -->
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
   </PropertyGroup>
 
   <ItemGroup>
